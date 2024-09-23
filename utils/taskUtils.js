@@ -15,8 +15,27 @@ function saveTasks() {
 function deleteTaskById(taskId) {
   const taskIndex = getIndexOfTask(taskId);
   const fromColumn = getColumnOfTask(taskId);
-  tasks[fromColumn].splice(taskIndex, 1);
+  const deletedTask = tasks[fromColumn].splice(taskIndex, 1);
   saveTasks();
+  return deletedTask;
+}
+
+function deleteTaskByIdAndColumn(taskId, column) {
+  const taskIndex = getIndexOfTask(taskId);
+  const deletedTask = tasks[column].splice(taskIndex, 1);
+  saveTasks();
+  return deletedTask;
+}
+
+function transferTask(taskId, toColumn) {
+  const fromColumn = getColumnOfTask(taskId);
+  if (fromColumn === toColumn) {
+    return false;
+  }
+  const deletedTask = deleteTaskById(taskId, fromColumn);
+  saveTask(toColumn, deletedTask);
+
+  return true;
 }
 
 function saveTask(column, taskText) {
@@ -28,7 +47,7 @@ function getTaskId(column, index) {
   return `${column}-task-${index}`;
 }
 
-function isValidTaskInput(value) {
+function isValidTask(value) {
   return value.trim() !== "";
 }
 

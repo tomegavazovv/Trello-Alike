@@ -1,5 +1,4 @@
 let tasks = getTasks();
-console.log(tasks)
 init();
 
 function renderTasks() {
@@ -16,17 +15,26 @@ function addTask(column) {
   const input = getTaskInputEl(column);
   const value = input.value;
 
-  if (isValidTaskInput(value)) {
+  if (isValidTask(value)) {
     resetInput(input);
     saveTask(column, value);
-    renderTasks()
+    renderTasks();
   }
 }
 
 function deleteTask(event) {
   const taskId = event.target.id.split("delete-")[1];
   deleteTaskById(taskId);
-  renderTasks()
+  renderTasks();
+}
+
+function dropHandler(event) {
+  event.preventDefault();
+  const taskId = event.dataTransfer.getData("id");
+  const toColumn = event.target.closest(".column").id;
+  if (transferTask(taskId, toColumn)) {
+    renderTasks();
+  }
 }
 
 function init() {
