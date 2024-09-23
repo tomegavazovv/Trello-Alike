@@ -1,23 +1,23 @@
 function initDragEventListeners() {
   document.querySelectorAll(".column").forEach((column) => {
-    column.addEventListener("dragover", _allowDrop);
-    column.addEventListener("drop", _dropHandler);
+    column.addEventListener("dragover", allowDrop);
+    column.addEventListener("drop", dropHandler);
   });
 }
 
 function listenDrag(el) {
-  el.addEventListener("dragstart", _dragHandler);
+  el.addEventListener("dragstart", dragHandler);
 }
 
-function _dragHandler(event) {
+function dragHandler(event) {
   event.dataTransfer.setData("id", event.target.id);
 }
 
-function _allowDrop(event) {
+function allowDrop(event) {
   event.preventDefault();
 }
 
-function _dropHandler(event) {
+function dropHandler(event) {
   event.preventDefault();
   const taskId = event.dataTransfer.getData("id");
   const fromColumn = getColumnOfTask(taskId)
@@ -27,7 +27,7 @@ function _dropHandler(event) {
   if (fromColumn !== toColumn) {
     const task = tasks[fromColumn].splice(taskIndex, 1)[0];
     tasks[toColumn].push(task);
-    saveTasks(tasks);
-    renderTasks(tasks);
+    saveTasks();
+    renderTasks();
   }
 }
