@@ -4,9 +4,11 @@ init();
 function renderTasks() {
   Object.entries(tasks).forEach(([column, columnTasks]) => {
     const columnEl = getTasksColumnElement(column);
+    
     clearColumnTasks(columnEl);
 
     const taskElements = createTaskElements(column, columnTasks);
+    taskElements.forEach(taskEl => listenDrag(taskEl))
     appendTasksToColumn(columnEl, taskElements);
   });
 }

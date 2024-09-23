@@ -21,8 +21,6 @@ function createTaskContainerItem(taskId) {
     draggable: true,
   };
   const taskContainerEl = createDOMElement("div", props);
-  listenDrag(taskContainerEl);
-
   return taskContainerEl;
 }
 
