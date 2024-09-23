@@ -1,7 +1,15 @@
+function getTasks() {
+  return (
+    readFromLocalStorageAsJSON('tasks') || {
+      todo: [],
+      inprogress: [],
+      done: [],
+    }
+  );
+}
 
-
-function getTaskInputEl(column) {
-  return document.getElementById(column).querySelector("input");
+function saveTasks(tasks) {
+  saveToLocalStorageAsJSON("tasks", tasks);
 }
 
 function isValidTaskInput(value) {
@@ -12,18 +20,22 @@ function resetInput(input) {
   input.value = "";
 }
 
-function saveTasks() {
-  localStorage.setItem("tasks", JSON.stringify(tasks));
+function getTaskInputEl(column) {
+  return document.getElementById(column).querySelector("input");
 }
 
-function getTasks() {
-  return (
-    JSON.parse(localStorage.getItem("tasks")) || {
-      todo: [],
-      inprogress: [],
-      done: [],
-    }
-  );
+function getTaskColumnElement(column) {
+  return document.getElementById(column).querySelector(".tasks");
 }
 
+function generateTaskId(column, index) {
+  return `${column}-task-${index}`;
+}
 
+function getColumnOfTask(id){
+    return id.split("-")[0];
+}
+
+function getIndexOfTask(id){
+    return id.split("-")[2];
+}

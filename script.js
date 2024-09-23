@@ -1,9 +1,9 @@
 let tasks = getTasks();
 init();
 
-function renderTasks() {
+function renderTasks(tasks) {
   Object.entries(tasks).forEach(([column, columnTasks]) => {
-    const columnEl = getColumnElement(column);
+    const columnEl = getTaskColumnElement(column);
     clearColumnTasks(columnEl);
 
     const taskElements = createTaskElements(column, columnTasks);
@@ -18,22 +18,22 @@ function addTask(column) {
   if (isValidTaskInput(value)) {
     tasks[column].push(value);
     resetInput(input);
-    saveTasks();
-    renderTasks();
+    saveTasks(tasks);
+    renderTasks(tasks);
   }
 }
 
 function deleteTask(event) {
   const taskId = event.target.id.split("delete-")[1];
-  const taskIndex = taskId.split("-")[2];
-  const fromColumn = event.target.id.split("-")[1];
+  const taskIndex = getIndexOfTask(taskId);
+  const fromColumn = getColumnOfTask(taskId);
 
   tasks[fromColumn].splice(taskIndex, 1);
-  saveTasks();
-  renderTasks();
+  saveTasks(tasks);
+  renderTasks(tasks);
 }
 
 function init() {
-  renderTasks();
+  renderTasks(tasks);
   initDragEventListeners();
 }

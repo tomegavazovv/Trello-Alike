@@ -1,13 +1,9 @@
-function createTaskElements(column, tasks) {
-  return tasks.map((task, index) => _createTaskElement(column, task, index));
-}
-
 function appendTasksToColumn(columnEl, taskElements) {
   taskElements.forEach((taskEl) => columnEl.appendChild(taskEl));
 }
 
-function getColumnElement(column) {
-  return document.getElementById(column).querySelector(".tasks");
+function createTaskElements(column, tasks) {
+  return tasks.map((task, index) => _createTaskElement(column, task, index));
 }
 
 function clearColumnTasks(columnEl) {
@@ -15,7 +11,7 @@ function clearColumnTasks(columnEl) {
 }
 
 function _createTaskElement(column, taskText, index) {
-  const taskId = `${column}-task-${index}`
+  const taskId = generateTaskId(column, index);
   const taskEl = _createTaskContainerItem(taskId);
   const taskTextEl = _createTaskTextElement(taskText);
   const deleteBtnEl = _createDeleteButton(taskId);
@@ -23,17 +19,16 @@ function _createTaskElement(column, taskText, index) {
   taskEl.appendChild(taskTextEl);
   taskEl.appendChild(deleteBtnEl);
 
-  taskEl.addEventListener("dragstart", drag);
-
   return taskEl;
 }
 
-function _createTaskContainerItem(taskId){
-  const taskContainerEl = document.createElement('div')
-  taskContainerEl.className = 'task'
-  taskContainerEl.draggable = true
-  taskContainerEl.id = taskId
-  return taskContainerEl
+function _createTaskContainerItem(taskId) {
+  const taskContainerEl = document.createElement("div");
+  taskContainerEl.className = "task";
+  taskContainerEl.id = taskId;
+  taskContainerEl.draggable = true;
+  listenDrag(taskContainerEl);
+  return taskContainerEl;
 }
 
 function _createTaskTextElement(task) {
@@ -46,7 +41,7 @@ function _createDeleteButton(taskId) {
   const deleteBtn = document.createElement("button");
   deleteBtn.textContent = "X";
   deleteBtn.className = "delete-btn";
-  deleteBtn.onclick = deleteTask
-  deleteBtn.id = `delete-${taskId}`
+  deleteBtn.onclick = deleteTask;
+  deleteBtn.id = `delete-${taskId}`;
   return deleteBtn;
 }
