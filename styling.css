@@ -1,71 +1,92 @@
 body {
-    font-family: 'Segoe UI';
-    margin: 0;
-    padding: 20px;
-    background-color: #f0f2f5;
-    color: #172b4d;
+  font-family: Tahoma, Verdana, sans-serif;
+  margin: 0;
+  padding: 20px;
+  background-color: #f0f2f5;
+  color: #172b4d;
 }
 
 .board {
-    display: flex;
-    justify-content: space-around;
-    gap: 20px;
+  display: flex;
+  justify-content: space-around;
+  gap: 20px;
 }
 
 .column {
-    background-color: #ebecf0;
-    border-radius: 8px;
-    width: 300px;
-    padding: 16px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: #ebecf0;
+  border-radius: 8px;
+  width: 300px;
+  padding: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .column h2 {
-    margin-top: 0;
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 16px;
+  margin-top: 0;
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 16px;
 }
 
 .task {
-    background-color: white;
-    border-radius: 6px;
-    padding: 12px;
-    margin-bottom: 12px;
-    cursor: move;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-    transition: box-shadow 0.2s ease;
+  background-color: white;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 12px;
+  cursor: move;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.2s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
 }
 
 .task:hover {
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
 }
 
 .add-task {
-    margin-top: 16px;
-    display: flex;
-    gap: 8px;
+  margin-top: 16px;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
 }
 
 .add-task input {
-    flex-grow: 1;
-    padding: 8px 12px;
-    border: 1px solid #dfe1e6;
-    border-radius: 4px;
-    font-size: 14px;
+  flex-grow: 1;
+  padding: 8px 12px;
+  border: 1px solid #dfe1e6;
+  border-radius: 4px;
+  font-size: 14px;
+  width: 100%;
 }
 
 .add-task button {
-    background-color: #0079bf;
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background-color 0.2s ease;
+  background-color: #0079bf;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
 }
 
 .add-task button:hover {
-    background-color: #026aa7;
+  background-color: #026aa7;
+}
+
+.task .delete-btn {
+  background-color: #d1453b;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background-color 0.2s ease;
+  margin-left: 8px;
+}
+
+.task .delete-btn:hover {
+  background-color: #b03a2e;
 }
