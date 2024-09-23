@@ -19,12 +19,14 @@ function addTask(column) {
   if (isValidTaskInput(value)) {
     resetInput(input);
     saveTask(column, value);
+    renderTasks()
   }
 }
 
 function deleteTask(event) {
   const taskId = event.target.id.split("delete-")[1];
   deleteTaskById(taskId);
+  renderTasks()
 }
 
 function init() {

@@ -17,13 +17,11 @@ function deleteTaskById(taskId) {
   const fromColumn = getColumnOfTask(taskId);
   tasks[fromColumn].splice(taskIndex, 1);
   saveTasks();
-  renderTasks();
 }
 
 function saveTask(column, taskText) {
   tasks[column].push(taskText);
   saveTasks();
-  renderTasks();
 }
 
 function getTaskId(column, index) {
