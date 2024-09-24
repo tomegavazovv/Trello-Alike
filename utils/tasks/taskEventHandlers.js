@@ -24,16 +24,9 @@ function dropHandler(event) {
     const toColumn = event.target.closest(".column").id;
 
     if (fromColumn === toColumn) {
-        const targetTask = event.target.closest(".task");
-        if (targetTask && targetTask.id !== taskId) {
-            if (reorderTask(taskId, toColumn, targetTask.id)) {
-                renderTasks();
-            }
-        }
+        handleSameColumnDrop(event, taskId, toColumn);
     } else {
-        if (transferTask(taskId, fromColumn, toColumn)) {
-            renderTasks();
-        }
+        handleDifferentColumnDrop(taskId, fromColumn, toColumn);
     }
 }
 
@@ -50,4 +43,19 @@ function dragEndHandler(event) {
 
 function allowDrop(event) {
     event.preventDefault();
+}
+
+function handleSameColumnDrop(event, taskId, column) {
+    const targetTask = event.target.closest(".task");
+    if (!targetTask || targetTask.id === taskId) return;
+
+    if (reorderTask(taskId, column, targetTask.id)) {
+        renderTasks();
+    }
+}
+
+function handleDifferentColumnDrop(taskId, fromColumn, toColumn) {
+    if (transferTask(taskId, fromColumn, toColumn)) {
+        renderTasks();
+    }
 }
