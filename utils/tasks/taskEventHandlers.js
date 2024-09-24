@@ -22,7 +22,28 @@ function dropHandler(event) {
     const taskId = event.dataTransfer.getData("id");
     const fromColumn = event.dataTransfer.getData("fromColumn");
     const toColumn = event.target.closest(".column").id;
-    if (transferTask(taskId, fromColumn, toColumn)) {
+    
+    if (fromColumn === toColumn) {
+        const targetTask = event.target.closest(".task");
+        if (targetTask && targetTask.id !== taskId) {
+            reorderTask(taskId, toColumn, targetTask.id);
+        }
+    } else {
+        if (transferTask(taskId, fromColumn, toColumn)) {
+            renderTasks();
+        }
+    }
+}
+
+function reorderTask(taskId, column, targetTaskId) {
+    const tasks = getTasksByColumn(column);
+    const taskIndex = tasks.findIndex(task => task.id === taskId);
+    const targetIndex = tasks.findIndex(task => task.id === targetTaskId);
+    
+    if (taskIndex !== -1 && targetIndex !== -1) {
+        const [movedTask] = tasks.splice(taskIndex, 1);
+        tasks.splice(targetIndex, 0, movedTask);
+        updateTasksOfColumn(tasks, column);
         renderTasks();
     }
 }

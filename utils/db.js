@@ -16,7 +16,7 @@ function deleteTask(taskId, fromColumn) {
     const deletedTask = tasks[fromColumn].splice(taskIndex, 1)[0];
     saveTasks();
     return deletedTask;
-  }
+}
 
 function getTask(taskId, fromColumn) {
     return tasks[fromColumn].find(task => task.id === taskId);
@@ -27,6 +27,17 @@ function saveTasks() {
 }
 
 function getTasks() {
-    return tasks;
+    return Object.fromEntries(
+        Object.entries(tasks).map(([key, value]) => [key, [...value]])
+    );
+}
+
+function getTasksByColumn(column) {
+    return tasks[column];
+}
+
+function updateTasksOfColumn(tasks, column) {
+    tasks[column] = tasks;
+    saveTasks();
 }
 
