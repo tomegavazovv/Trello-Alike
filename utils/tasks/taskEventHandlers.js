@@ -22,11 +22,13 @@ function dropHandler(event) {
     const taskId = event.dataTransfer.getData("id");
     const fromColumn = event.dataTransfer.getData("fromColumn");
     const toColumn = event.target.closest(".column").id;
-    
+
     if (fromColumn === toColumn) {
         const targetTask = event.target.closest(".task");
         if (targetTask && targetTask.id !== taskId) {
-            reorderTask(taskId, toColumn, targetTask.id);
+            if (reorderTask(taskId, toColumn, targetTask.id)) {
+                renderTasks();
+            }
         }
     } else {
         if (transferTask(taskId, fromColumn, toColumn)) {
