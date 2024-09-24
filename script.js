@@ -1,45 +1,22 @@
-let tasks = getTasks();
-init();
+renderTasks();
 
-function renderTasks() {
-  Object.entries(tasks).forEach(([column, columnTasks]) => {
-    const columnEl = getTasksColumnElement(column);
-    
-    clearColumnTasks(columnEl);
+function addTaskEventListeners() {
+  document.querySelectorAll(".add-task-btn").forEach(btn => {
+    btn.addEventListener("click", handleAddTask);
+  });
 
-    const taskElements = createTaskElements(column, columnTasks);
-    taskElements.forEach(taskEl => listenDrag(taskEl))
-    appendTasksToColumn(columnEl, taskElements);
+  document.querySelectorAll(".delete-btn").forEach(btn => {
+    btn.addEventListener("click", deleteTaskHandler);
   });
 }
 
-function addTask(column) {
-  const input = getTaskInputEl(column);
-  const value = input.value;
-
-  if (isValidTask(value)) {
-    resetInput(input);
-    saveTask(column, value);
-    renderTasks();
-  }
-}
-
-function deleteTask(event) {
-  const taskId = event.target.id.split("delete-")[1];
-  deleteTaskById(taskId);
-  renderTasks();
-}
-
-function dropHandler(event) {
-  event.preventDefault();
-  const taskId = event.dataTransfer.getData("id");
-  const toColumn = event.target.closest(".column").id;
-  if (transferTask(taskId, toColumn)) {
-    renderTasks();
-  }
-}
-
-function init() {
-  renderTasks();
-  initDragEventListeners();
+function addDragEventListeners() {
+    document.querySelectorAll(".column").forEach((column) => {
+        column.addEventListener("dragover", allowDrop);
+        column.addEventListener("drop", dropHandler);
+    });
+    document.querySelectorAll(".task").forEach((task) => {
+      task.addEventListener("dragstart", dragStartHandler);
+      task.addEventListener("dragend", dragEndHandler);
+    });
 }

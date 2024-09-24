@@ -2,7 +2,7 @@ function resetInput(input) {
   input.value = "";
 }
 
-function getTaskInputEl(column) {
+function getTaskInputElement(column) {
   return document.getElementById(column).querySelector("input");
 }
 
@@ -33,7 +33,6 @@ function createDeleteTaskButton(taskId) {
   const props = {
     textContent: "X",
     className: "delete-btn",
-    onclick: deleteTask,
     id: `delete-${taskId}`,
   };
   return createDOMElement("button", props);
