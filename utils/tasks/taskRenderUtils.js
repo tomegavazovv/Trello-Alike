@@ -6,8 +6,6 @@ function renderTasks() {
 
     const taskElements = createTaskElements(column, columnTasks);
     appendTasksToColumn(columnEl, taskElements);
-    addDragEventListeners();
-    addTaskEventListeners();
   });
 }
 
@@ -22,9 +20,12 @@ function createTaskElements(column) {
 
 function createTaskElement(task) {
   const taskEl = createTaskContainerItem(task.id);
-  const taskTextEl = createTaskTextElement(task.text);
+  const taskTextEl = createTaskTextElement(task);
   const deleteBtnEl = createDeleteTaskButton(task.id);
   taskEl.appendChild(taskTextEl);
   taskEl.appendChild(deleteBtnEl);
+
+  
+
   return taskEl;
 }

@@ -17,6 +17,15 @@ function deleteTaskHandler(event) {
     renderTasks();
 }
 
+function handleTaskTextUpdate(originalText, column, event) {
+    const updatedText = event.target.textContent.trim();
+    const taskId = event.target.closest(".task").id;
+    if (updatedText !== originalText) {
+        updateTaskText(taskId, column, updatedText);
+        renderTasks();
+    }
+}
+
 function dropHandler(event) {
     event.preventDefault();
     const taskId = event.dataTransfer.getData("id");

@@ -90,3 +90,10 @@ body {
 .task .delete-btn:hover {
   background-color: #b03a2e;
 }
+
+
+.task-text[contenteditable="true"]:focus {
+  cursor: text;
+  outline: 2px solid #0079bf;
+  padding: 2px;
+}

@@ -41,3 +41,11 @@ function updateTasksOfColumn(tasks, column) {
     saveTasks();
 }
 
+function updateTaskText(taskId, column, newText) {
+    const task = tasks[column].find(t => t.id === taskId);
+    if (task) {
+        task.text = newText;
+        saveTasks(tasks);
+    }
+}
+

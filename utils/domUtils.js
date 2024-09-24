@@ -24,8 +24,15 @@ function createTaskContainerItem(taskId) {
   return taskContainerEl;
 }
 
-function createTaskTextElement(taskText) {
-  const props = { textContent: taskText };
+function createTaskTextElement(task) {
+  const props = { 
+    textContent: task.text, 
+    className: "task-text", 
+    id: `task-text-${task.id}` ,
+    dataset: { originalText: task.text }
+
+  };
+
   return createDOMElement("span", props);
 }
 
