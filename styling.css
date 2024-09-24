@@ -40,6 +40,12 @@ body {
   align-items: flex-start;
 }
 
+.task-text {
+  flex: 1;
+  margin-right: 12px; 
+  word-break: break-word;
+}
+
 .task:hover {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
 }
@@ -51,13 +57,17 @@ body {
   align-items: flex-start;
 }
 
-.add-task input {
+.add-task textarea {
   flex-grow: 1;
   padding: 8px 12px;
   border: 1px solid #dfe1e6;
   border-radius: 4px;
   font-size: 14px;
   width: 100%;
+  resize: none;
+  overflow: hidden;
+  min-height: 36px;
+  font-family: inherit;
 }
 
 .add-task button {
@@ -85,6 +95,7 @@ body {
   font-size: 12px;
   transition: background-color 0.2s ease;
   margin-left: 8px;
+  flex-shrink: 0;
 }
 
 .task .delete-btn:hover {

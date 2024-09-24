@@ -3,7 +3,7 @@ function resetInput(input) {
 }
 
 function getTaskInputElement(column) {
-  return document.getElementById(column).querySelector("input");
+  return document.getElementById(column).querySelector("#todo-input");
 }
 
 function getTasksColumnElement(column) {
