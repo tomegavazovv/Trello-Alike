@@ -35,19 +35,6 @@ function dropHandler(event) {
     }
 }
 
-function reorderTask(taskId, column, targetTaskId) {
-    const tasks = getTasksByColumn(column);
-    const taskIndex = tasks.findIndex(task => task.id === taskId);
-    const targetIndex = tasks.findIndex(task => task.id === targetTaskId);
-    
-    if (taskIndex !== -1 && targetIndex !== -1) {
-        const [movedTask] = tasks.splice(taskIndex, 1);
-        tasks.splice(targetIndex, 0, movedTask);
-        updateTasksOfColumn(tasks, column);
-        renderTasks();
-    }
-}
-
 function dragStartHandler(event) {
     event.dataTransfer.setData("id", event.target.id);
     event.dataTransfer.setData("fromColumn", event.target.closest(".column").id);

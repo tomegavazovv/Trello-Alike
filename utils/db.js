@@ -13,7 +13,7 @@ function saveTask(taskText, column) {
 
 function deleteTask(taskId, fromColumn) {
     const taskIndex = tasks[fromColumn].findIndex(task => task.id === taskId);
-    const deletedTask = tasks[fromColumn].splice(taskIndex, 1)[0];
+    const [deletedTask] = tasks[fromColumn].splice(taskIndex, 1);
     saveTasks();
     return deletedTask;
 }
@@ -32,7 +32,7 @@ function getTasks() {
     );
 }
 
-function getTasksByColumn(column) {
+function getTasksOfColumn(column) {
     return tasks[column];
 }
 
