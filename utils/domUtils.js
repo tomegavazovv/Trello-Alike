@@ -2,8 +2,8 @@ function resetInput(input) {
   input.value = "";
 }
 
-function getTaskInputEl(column) {
-  return document.getElementById(column).querySelector("input");
+function getTaskInputElement(column) {
+  return document.getElementById(column).querySelector("#todo-input");
 }
 
 function getTasksColumnElement(column) {
@@ -24,8 +24,14 @@ function createTaskContainerItem(taskId) {
   return taskContainerEl;
 }
 
-function createTaskTextElement(taskText) {
-  const props = { textContent: taskText };
+function createTaskTextElement(task) {
+  const props = { 
+    textContent: task.text, 
+    className: "task-text", 
+    id: `task-text-${task.id}` ,
+    dataset: { originalText: task.text }
+  };
+
   return createDOMElement("span", props);
 }
 
@@ -33,7 +39,6 @@ function createDeleteTaskButton(taskId) {
   const props = {
     textContent: "X",
     className: "delete-btn",
-    onclick: deleteTask,
     id: `delete-${taskId}`,
   };
   return createDOMElement("button", props);
