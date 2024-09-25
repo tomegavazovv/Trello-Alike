@@ -1,37 +1,34 @@
-import { getTaskInputElement, resetInput } from "../domUtils";
-import { isValidTask, reorderTask, transferTask } from "./taskUtils";
-import { renderTasks } from "./taskRenderUtils";
-import { saveTask, deleteTask, updateTaskText } from "../db";
+import { getNearestElementByMouseY, getTaskInputElement, resetInput } from "../domUtils";
+import { isValidTask } from "./taskUtils";
+import { addTask, deleteTaskFromColumn, moveTaskAfter, moveTaskToColumn, updateTaskText } from "./taskService";
 
-export function handleAddTask(event) {
+export async function handleAddTask(event) {
     const column = event.target.closest(".column").id;
     const input = getTaskInputElement(column);
     const value = input.value;
 
     if (isValidTask(value)) {
         resetInput(input);
-        saveTask(value, column);
-        renderTasks();
+        await addTask(value, column);
     }
 }
 
-export function deleteTaskHandler(event) {
+export async function deleteTaskHandler(event) {
     const taskId = event.target.closest(".task").id;
     const column = event.target.closest(".column").id;
-    deleteTask(taskId, column);
-    renderTasks();
+
+    deleteTaskFromColumn(taskId, column);
 }
 
-export function handleTaskTextUpdate(event) {
+export async function handleTaskTextUpdate(event) {
     event.target.contentEditable = false;
-    const column = event.target.closest(".column").id;
     const taskId = event.target.closest(".task").id;
+    const column = event.target.closest(".column").id;
     const updatedText = event.target.textContent.trim();
     const originalText = event.target.dataset.originalText;
 
     if (updatedText !== originalText) {
-        updateTaskText(taskId, column, updatedText);
-        renderTasks();
+        updateTaskText(taskId, updatedText, column);
     }
 }
 
@@ -41,17 +38,18 @@ export function handleTaskDoubleClick(event) {
     taskText.focus();
 }
 
-export function dropHandler(event) {
+export async function dropHandler(event) {
     event.preventDefault();
-    const taskId = event.dataTransfer.getData("id");
     const fromColumn = event.dataTransfer.getData("fromColumn");
     const toColumn = event.target.closest(".column").id;
 
     if (fromColumn === toColumn) {
-        _handleSameColumnDrop(event, taskId, toColumn);
-    } else {
-        _handleDifferentColumnDrop(taskId, fromColumn, toColumn);
+        _handleSameColumnDrop(event);
     }
+    else {
+        _handleDifferentColumnDrop(event);
+    }
+
 }
 
 export function dragStartHandler(event) {
@@ -69,17 +67,30 @@ export function allowDrop(event) {
     event.preventDefault();
 }
 
-function _handleSameColumnDrop(event, taskId, column) {
-    const targetTask = event.target.closest(".task");
-    if (!targetTask || targetTask.id === taskId) return;
+function _handleSameColumnDrop(event) {
+    const droppedTaskId = event.dataTransfer.getData("id");
+    const targetTaskElement = event.target.closest(".task");
+    const column = event.target.closest(".column").id;
 
-    if (reorderTask(taskId, column, targetTask.id)) {
-        renderTasks();
+    let targetTaskId = null;
+
+    if (targetTaskElement) {
+        targetTaskId = targetTaskElement.id;
+    } else {
+        const mouseY = event.clientY;
+        const selector = `#${column} .task`;
+        targetTaskId = getNearestElementByMouseY(selector, mouseY)?.id;
+    }
+
+    if (targetTaskId && targetTaskId !== droppedTaskId) {
+        moveTaskAfter(droppedTaskId, targetTaskId, column);
     }
 }
 
-function _handleDifferentColumnDrop(taskId, fromColumn, toColumn) {
-    if (transferTask(taskId, fromColumn, toColumn)) {
-        renderTasks();
-    }
+function _handleDifferentColumnDrop(event) {
+    const droppedTaskId = event.dataTransfer.getData("id");
+    const fromColumn = event.dataTransfer.getData("fromColumn");
+    const toColumn = event.target.closest(".column").id;
+
+    moveTaskToColumn(droppedTaskId, fromColumn, toColumn);
 }

@@ -11,36 +11,40 @@ import {
   dropHandler,
 } from "./utils/tasks/taskEventHandlers";
 import { isAddTaskButton, isDeleteButton, isTask, isTaskText } from "./utils/classChecks";
+import state from './state.js';
 
-renderTasks();
+async function init() {
+  state.addListener(renderTasks);
+  await state.initState();
+  renderTasks();
 
-const boardElement = document.querySelector(".board");
-const columns = document.querySelectorAll(".column");
-addTaskEventListeners(boardElement);
-addDragEventListeners(boardElement, columns);
-
+  const boardElement = document.querySelector(".board");
+  const columns = document.querySelectorAll(".column");
+  addTaskEventListeners(boardElement);
+  addDragEventListeners(boardElement, columns);
+}
 
 function addTaskEventListeners(boardElement) {
-  boardElement.addEventListener("click", (event) => {
+  boardElement.addEventListener("click", async (event) => {
     const target = event.target;
     if (isAddTaskButton(target)) {
-      handleAddTask(event);
+      await handleAddTask(event);
     } else if (isDeleteButton(target)) {
-      deleteTaskHandler(event);
+      await deleteTaskHandler(event);
     }
   });
 
-  boardElement.addEventListener("dblclick", (event) => {
-    if (isTaskText(event.target)) {
-      handleTaskDoubleClick(event);
-    }
-  });
+    boardElement.addEventListener("dblclick", (event) => {
+      if (isTaskText(event.target)) {
+        handleTaskDoubleClick(event);
+      }
+    });
 
-  boardElement.addEventListener("blur", (event) => {
-    if (isTaskText(event.target)) {
-      handleTaskTextUpdate(event);
-    }
-  }, true);
+    boardElement.addEventListener("blur", async (event) => {
+      if (isTaskText(event.target)) {
+        handleTaskTextUpdate(event);
+      }
+    }, true);
 }
 
 function addDragEventListeners(boardElement, columns) {
@@ -61,3 +65,5 @@ function addDragEventListeners(boardElement, columns) {
     column.addEventListener("drop", dropHandler);
   });
 }
+
+init()

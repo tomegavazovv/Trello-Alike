@@ -1,52 +1,63 @@
-import { readFromLocalStorageAsJSON, saveToLocalStorageAsJSON } from "./localStorageUtils";
+import { db } from '../firebaseConfig';
+import { collection, addDoc, deleteDoc, doc, updateDoc, getDocs, query, where, serverTimestamp, writeBatch, getDoc } from 'firebase/firestore';
 
-const tasks =
-    readFromLocalStorageAsJSON("tasks") || {
-        todo: [],
-        inprogress: [],
-        done: [],
-    };
+const TASKS_COLLECTION = 'tasks';
 
-export function saveTask(taskText, column) {
-    const id = Math.random().toString(36).slice(8);
-    tasks[column].push({ id, text: taskText });
-    saveTasks();
+export async function saveTask(task) {
+    task.createdAt = new Date();
+    task.updatedAt = new Date();
+
+    const docRef = await addDoc(collection(db, TASKS_COLLECTION), task);
+    const addedTask = { id: docRef.id, ...task };
+    return addedTask;
 }
 
-export function deleteTask(taskId, fromColumn) {
-    const taskIndex = tasks[fromColumn].findIndex(task => task.id === taskId);
-    const [deletedTask] = tasks[fromColumn].splice(taskIndex, 1);
-    saveTasks();
-    return deletedTask;
+export async function updateTask(task) {
+    updateDoc(doc(db, TASKS_COLLECTION, task.id), {
+        ...task,
+        updatedAt: serverTimestamp()
+    });
 }
 
-export function getTask(taskId, fromColumn) {
-    return tasks[fromColumn].find(task => task.id === taskId);
+export async function updateTasksOrder(updatedTasks) {
+    const batch = writeBatch(db);
+    updatedTasks.forEach(task => {
+        const taskRef = doc(db, TASKS_COLLECTION, task.id);
+        batch.update(taskRef, { 
+            order: task.order,
+            updatedAt: serverTimestamp()
+        });
+    });
+    await batch.commit();
 }
 
-export function saveTasks() {
-    saveToLocalStorageAsJSON("tasks", tasks);
+export function deleteTask(task) {
+    deleteDoc(doc(db, TASKS_COLLECTION, task.id));
 }
 
-export function getTasks() {
-    return Object.fromEntries(
-        Object.entries(tasks).map(([key, value]) => [key, [...value]])
-    );
+export async function getTasks() {
+    const tasksSnapshot = await getDocs(collection(db, TASKS_COLLECTION));
+    const tasks = { todo: [], inprogress: [], done: [] };
+    tasksSnapshot.forEach(doc => {
+        const task = { id: doc.id, ...doc.data() };
+        tasks[task.column].push(task);
+    });
+    return tasks;
 }
 
-export function getTasksOfColumn(column) {
-    return [...tasks[column]];
+export async function updateTaskColumn(taskId, newColumn) {
+    await updateDoc(doc(db, TASKS_COLLECTION, taskId), {
+        column: newColumn,
+        updatedAt: serverTimestamp()
+    });
 }
 
-export function updateTasksOfColumn(updatedTasks, column) {
-    tasks[column] = updatedTasks;
-    saveTasks();
+export async function getTaskOrder(taskId) {
+    const docRef = doc(db, TASKS_COLLECTION, taskId);
+    const docSnap = await getDoc(docRef);
+    return docSnap.data().order;
 }
 
-export function updateTaskText(taskId, column, newText) {
-    const task = tasks[column].find(t => t.id === taskId);
-    if (task) {
-        task.text = newText;
-        saveTasks(tasks);
-    }
+export async function updateTaskOrder(taskId, newOrder) {
+    await updateDoc(doc(db, TASKS_COLLECTION, taskId), { order: newOrder });
 }

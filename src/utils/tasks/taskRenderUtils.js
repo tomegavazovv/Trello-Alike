@@ -1,13 +1,12 @@
 import { getTasksColumnElement, clearColumnTasks, createTaskContainerItem, createTaskTextElement, createDeleteTaskButton } from "../domUtils";
-import { getTasks } from "../db";
+import state from "../../state.js";
 
 export function renderTasks() {
-  const tasks = getTasks();
-  Object.entries(tasks).forEach(([column, columnTasks]) => {
+  Object.entries(state.tasks).forEach(([column, columnTasks]) => {
     const columnEl = getTasksColumnElement(column);
     clearColumnTasks(columnEl);
 
-    const taskElements = createTaskElements(column, columnTasks);
+    const taskElements = createTaskElements(columnTasks);
     appendTasksToColumn(columnEl, taskElements);
   });
 }
@@ -16,9 +15,8 @@ function appendTasksToColumn(columnEl, taskElements) {
   taskElements.forEach((taskEl) => columnEl.appendChild(taskEl));
 }
 
-function createTaskElements(column) {
-  const tasks = getTasks();
-  return tasks[column].map(task => createTaskElement(task));
+function createTaskElements(tasks) {
+  return tasks.sort((t1, t2) => t1.order - t2.order).map(task => createTaskElement(task));
 }
 
 function createTaskElement(task) {
