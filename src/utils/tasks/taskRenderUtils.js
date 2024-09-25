@@ -1,4 +1,7 @@
-function renderTasks() {
+import { getTasksColumnElement, clearColumnTasks, createTaskContainerItem, createTaskTextElement, createDeleteTaskButton } from "../domUtils";
+import { getTasks } from "../db";
+
+export function renderTasks() {
   const tasks = getTasks();
   Object.entries(tasks).forEach(([column, columnTasks]) => {
     const columnEl = getTasksColumnElement(column);
@@ -15,7 +18,7 @@ function appendTasksToColumn(columnEl, taskElements) {
 
 function createTaskElements(column) {
   const tasks = getTasks();
-  return tasks[column].map(task => createTaskElement( task));
+  return tasks[column].map(task => createTaskElement(task));
 }
 
 function createTaskElement(task) {
@@ -24,8 +27,6 @@ function createTaskElement(task) {
   const deleteBtnEl = createDeleteTaskButton(task.id);
   taskEl.appendChild(taskTextEl);
   taskEl.appendChild(deleteBtnEl);
-
-  
 
   return taskEl;
 }

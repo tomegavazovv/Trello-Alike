@@ -1,15 +1,15 @@
-function isAddTaskButton(element) {
+export function isAddTaskButton(element) {
     return element.classList.contains("add-task-btn");
 }
 
-function isDeleteButton(element) {
+export function isDeleteButton(element) {
     return element.classList.contains("delete-btn");
 }
 
-function isTaskText(element) {
+export function isTaskText(element) {
     return element.classList.contains("task-text");
 }
 
-function isTask(element) {
+export function isTask(element) {
     return element.classList.contains("task");
 }

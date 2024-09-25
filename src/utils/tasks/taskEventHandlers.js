@@ -1,4 +1,9 @@
-function handleAddTask(event) {
+import { getTaskInputElement, resetInput } from "../domUtils";
+import { isValidTask, reorderTask, transferTask } from "./taskUtils";
+import { renderTasks } from "./taskRenderUtils";
+import { saveTask, deleteTask, updateTaskText } from "../db";
+
+export function handleAddTask(event) {
     const column = event.target.closest(".column").id;
     const input = getTaskInputElement(column);
     const value = input.value;
@@ -10,14 +15,14 @@ function handleAddTask(event) {
     }
 }
 
-function deleteTaskHandler(event) {
+export function deleteTaskHandler(event) {
     const taskId = event.target.closest(".task").id;
     const column = event.target.closest(".column").id;
     deleteTask(taskId, column);
     renderTasks();
 }
 
-function handleTaskTextUpdate(event) {
+export function handleTaskTextUpdate(event) {
     event.target.contentEditable = false;
     const column = event.target.closest(".column").id;
     const taskId = event.target.closest(".task").id;
@@ -30,13 +35,13 @@ function handleTaskTextUpdate(event) {
     }
 }
 
-function handleTaskDoubleClick(event) {
+export function handleTaskDoubleClick(event) {
     const taskText = event.target;
     taskText.contentEditable = true;
     taskText.focus();
 }
 
-function dropHandler(event) {
+export function dropHandler(event) {
     event.preventDefault();
     const taskId = event.dataTransfer.getData("id");
     const fromColumn = event.dataTransfer.getData("fromColumn");
@@ -49,18 +54,18 @@ function dropHandler(event) {
     }
 }
 
-function dragStartHandler(event) {
+export function dragStartHandler(event) {
     event.dataTransfer.setData("id", event.target.id);
     event.dataTransfer.setData("fromColumn", event.target.closest(".column").id);
     event.dataTransfer.effectAllowed = "move";
     event.target.style.opacity = "0.3";
 }
 
-function dragEndHandler(event) {
+export function dragEndHandler(event) {
     event.target.style.opacity = "1";
 }
 
-function allowDrop(event) {
+export function allowDrop(event) {
     event.preventDefault();
 }
 

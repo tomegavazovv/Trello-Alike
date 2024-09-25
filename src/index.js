@@ -1,3 +1,17 @@
+import './styling.css';
+import { renderTasks } from "./utils/tasks/taskRenderUtils";
+import {
+  handleAddTask,
+  deleteTaskHandler,
+  handleTaskTextUpdate,
+  handleTaskDoubleClick,
+  dragStartHandler,
+  dragEndHandler,
+  allowDrop,
+  dropHandler,
+} from "./utils/tasks/taskEventHandlers";
+import { isAddTaskButton, isDeleteButton, isTask, isTaskText } from "./utils/classChecks";
+
 renderTasks();
 
 const boardElement = document.querySelector(".board");
@@ -18,7 +32,7 @@ function addTaskEventListeners(boardElement) {
 
   boardElement.addEventListener("dblclick", (event) => {
     if (isTaskText(event.target)) {
-        handleTaskDoubleClick(event);
+      handleTaskDoubleClick(event);
     }
   });
 

@@ -1,4 +1,7 @@
-function transferTask(taskId, fromColumn, toColumn) {
+import { deleteTask, saveTask } from "../db";
+import { getTasksOfColumn, updateTasksOfColumn } from "../db";
+
+export function transferTask(taskId, fromColumn, toColumn) {
   if (fromColumn === toColumn) {
     return false;
   }
@@ -8,7 +11,7 @@ function transferTask(taskId, fromColumn, toColumn) {
   return true;
 }
 
-function reorderTask(taskId, column, targetTaskId) {
+export function reorderTask(taskId, column, targetTaskId) {
   const tasks = getTasksOfColumn(column);
   const taskIndex = tasks.findIndex(task => task.id === taskId);
   const targetIndex = tasks.findIndex(task => task.id === targetTaskId);
@@ -24,7 +27,7 @@ function reorderTask(taskId, column, targetTaskId) {
   return true;
 }
 
-function isValidTask(value) {
+export function isValidTask(value) {
   return value.trim() !== "";
 }
 

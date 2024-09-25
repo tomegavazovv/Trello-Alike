@@ -1,20 +1,20 @@
-function resetInput(input) {
+export function resetInput(input) {
   input.value = "";
 }
 
-function getTaskInputElement(column) {
+export function getTaskInputElement(column) {
   return document.getElementById(column).querySelector("#todo-input");
 }
 
-function getTasksColumnElement(column) {
+export function getTasksColumnElement(column) {
   return document.getElementById(column).querySelector(".tasks");
 }
 
-function clearColumnTasks(columnEl) {
+export function clearColumnTasks(columnEl) {
   columnEl.innerHTML = "";
 }
 
-function createTaskContainerItem(taskId) {
+export function createTaskContainerItem(taskId) {
   const props = {
     className: "task",
     id: taskId,
@@ -24,7 +24,7 @@ function createTaskContainerItem(taskId) {
   return taskContainerEl;
 }
 
-function createTaskTextElement(task) {
+export function createTaskTextElement(task) {
   const props = { 
     textContent: task.text, 
     className: "task-text", 
@@ -35,7 +35,7 @@ function createTaskTextElement(task) {
   return createDOMElement("span", props);
 }
 
-function createDeleteTaskButton(taskId) {
+export function createDeleteTaskButton(taskId) {
   const props = {
     textContent: "X",
     className: "delete-btn",
@@ -44,10 +44,14 @@ function createDeleteTaskButton(taskId) {
   return createDOMElement("button", props);
 }
 
-function createDOMElement(type, props) {
+export function createDOMElement(type, props) {
   const element = document.createElement(type);
   Object.keys(props).forEach((key) => {
-    element[key] = props[key];
+    if (key === 'dataset') {
+      Object.assign(element.dataset, props[key]);
+    } else {
+      element[key] = props[key];
+    }
   });
   return element;
 }
