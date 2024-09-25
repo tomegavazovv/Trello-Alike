@@ -33,11 +33,11 @@ function getTasks() {
 }
 
 function getTasksOfColumn(column) {
-    return tasks[column];
+    return [...tasks[column]];
 }
 
-function updateTasksOfColumn(tasks, column) {
-    tasks[column] = tasks;
+function updateTasksOfColumn(updatedTasks, column) {
+    tasks[column] = updatedTasks;
     saveTasks();
 }
 

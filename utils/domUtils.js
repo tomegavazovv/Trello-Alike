@@ -30,7 +30,6 @@ function createTaskTextElement(task) {
     className: "task-text", 
     id: `task-text-${task.id}` ,
     dataset: { originalText: task.text }
-
   };
 
   return createDOMElement("span", props);

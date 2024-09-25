@@ -17,13 +17,23 @@ function deleteTaskHandler(event) {
     renderTasks();
 }
 
-function handleTaskTextUpdate(originalText, column, event) {
-    const updatedText = event.target.textContent.trim();
+function handleTaskTextUpdate(event) {
+    event.target.contentEditable = false;
+    const column = event.target.closest(".column").id;
     const taskId = event.target.closest(".task").id;
+    const updatedText = event.target.textContent.trim();
+    const originalText = event.target.dataset.originalText;
+
     if (updatedText !== originalText) {
         updateTaskText(taskId, column, updatedText);
         renderTasks();
     }
+}
+
+function handleTaskDoubleClick(event) {
+    const taskText = event.target;
+    taskText.contentEditable = true;
+    taskText.focus();
 }
 
 function dropHandler(event) {
@@ -33,9 +43,9 @@ function dropHandler(event) {
     const toColumn = event.target.closest(".column").id;
 
     if (fromColumn === toColumn) {
-        handleSameColumnDrop(event, taskId, toColumn);
+        _handleSameColumnDrop(event, taskId, toColumn);
     } else {
-        handleDifferentColumnDrop(taskId, fromColumn, toColumn);
+        _handleDifferentColumnDrop(taskId, fromColumn, toColumn);
     }
 }
 
@@ -54,7 +64,7 @@ function allowDrop(event) {
     event.preventDefault();
 }
 
-function handleSameColumnDrop(event, taskId, column) {
+function _handleSameColumnDrop(event, taskId, column) {
     const targetTask = event.target.closest(".task");
     if (!targetTask || targetTask.id === taskId) return;
 
@@ -63,7 +73,7 @@ function handleSameColumnDrop(event, taskId, column) {
     }
 }
 
-function handleDifferentColumnDrop(taskId, fromColumn, toColumn) {
+function _handleDifferentColumnDrop(taskId, fromColumn, toColumn) {
     if (transferTask(taskId, fromColumn, toColumn)) {
         renderTasks();
     }

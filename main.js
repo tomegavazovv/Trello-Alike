@@ -1,48 +1,48 @@
 renderTasks();
-addTaskEventListeners();
-addDragEventListeners();
+
+const boardElement = document.querySelector(".board");
+const columns = document.querySelectorAll(".column");
+addTaskEventListeners(boardElement);
+addDragEventListeners(boardElement, columns);
 
 
-function addTaskEventListeners() {
-  document.querySelector(".board").addEventListener("click", (event) => {
+function addTaskEventListeners(boardElement) {
+  boardElement.addEventListener("click", (event) => {
     const target = event.target;
-    if (target.classList.contains("add-task-btn")) {
+    if (isAddTaskButton(target)) {
       handleAddTask(event);
-    } else if (target.classList.contains("delete-btn")) {
+    } else if (isDeleteButton(target)) {
       deleteTaskHandler(event);
     }
   });
 
-  document.querySelector(".board").addEventListener("dblclick", (event) => {
-    if (event.target.classList.contains("task-text")) {
-      event.target.contentEditable = true;
-      event.target.focus();
+  boardElement.addEventListener("dblclick", (event) => {
+    if (isTaskText(event.target)) {
+        handleTaskDoubleClick(event);
     }
   });
 
-  document.querySelector(".board").addEventListener("blur", (event) => {
-    if (event.target.classList.contains("task-text")) {
-      event.target.contentEditable = false;
-      const column = event.target.closest(".column").id;
-      handleTaskTextUpdate(event.target.dataset.originalText, column, event);
+  boardElement.addEventListener("blur", (event) => {
+    if (isTaskText(event.target)) {
+      handleTaskTextUpdate(event);
     }
   }, true);
 }
 
-function addDragEventListeners() {
-  document.querySelector(".board").addEventListener("dragstart", (event) => {
-    if (event.target.classList.contains("task")) {
+function addDragEventListeners(boardElement, columns) {
+  boardElement.addEventListener("dragstart", (event) => {
+    if (isTask(event.target)) {
       dragStartHandler(event);
     }
   });
 
-  document.querySelector(".board").addEventListener("dragend", (event) => {
-    if (event.target.classList.contains("task")) {
+  boardElement.addEventListener("dragend", (event) => {
+    if (isTask(event.target)) {
       dragEndHandler(event);
     }
   });
 
-  document.querySelectorAll(".column").forEach((column) => {
+  columns.forEach((column) => {
     column.addEventListener("dragover", allowDrop);
     column.addEventListener("drop", dropHandler);
   });
