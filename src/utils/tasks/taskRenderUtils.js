@@ -1,8 +1,8 @@
 import { getTasksColumnElement, clearColumnTasks, createTaskContainerItem, createTaskTextElement, createDeleteTaskButton } from "../domUtils";
-import state from "../../state.js";
+import store from "../../store.js";
 
 export function renderTasks() {
-  Object.entries(state.tasks).forEach(([column, columnTasks]) => {
+  Object.entries(store.state.tasks).forEach(([column, columnTasks]) => {
     const columnEl = getTasksColumnElement(column);
     clearColumnTasks(columnEl);
 

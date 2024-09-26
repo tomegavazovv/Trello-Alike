@@ -11,11 +11,13 @@ import {
   dropHandler,
 } from "./utils/tasks/taskEventHandlers";
 import { isAddTaskButton, isDeleteButton, isTask, isTaskText } from "./utils/classChecks";
-import state from './state.js';
+import store from './store.js';
+import { getTasks } from './utils/db.js';
 
 async function init() {
-  state.addListener(renderTasks);
-  await state.initState();
+  const tasks = await getTasks();
+  store.setTasks(tasks);
+  store.addListener(renderTasks);
   renderTasks();
 
   const boardElement = document.querySelector(".board");
