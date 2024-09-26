@@ -28,7 +28,11 @@ const store = {
 
     reducer(state, action) {
         switch (action.type) {
+
             case 'ADD_TASK':
+
+                console.trace('Dispatch call stack:');
+
                 return {
                     ...state,
                     tasks: {
@@ -61,12 +65,22 @@ const store = {
                     }
                 };
             case 'TRANSFER_TASK':
+                const { taskId, fromColumn, toColumn, order } = action.payload;
+                const fromTasks = state.tasks[fromColumn];
+                const toTasks = state.tasks[toColumn];
+                const taskIndex = fromTasks.findIndex(t => t.id === taskId);
+
+                if (taskIndex === -1) {
+                    return state; 
+                }
+
+                const [task] = fromTasks.splice(taskIndex, 1);
                 return {
                     ...state,
                     tasks: {
                         ...state.tasks,
-                        [action.payload.fromColumn]: state.tasks[action.payload.fromColumn].filter(t => t.id !== action.payload.updatedTask.id),
-                        [action.payload.updatedTask.column]: [...state.tasks[action.payload.updatedTask.column], action.payload.updatedTask]
+                        [fromColumn]: fromTasks,
+                        [toColumn]: [...toTasks, { ...task, column: toColumn, order }]
                     }
                 };
             default:
@@ -99,11 +113,11 @@ export const actions = {
     updateTask: (task) => ({
         type: 'UPDATE_TASK', payload: { task }
     }),
-    updateTasksOrder: (column, updatedTasks) => ({
+    updateTasksOrder: (updatedTasks, column) => ({
         type: 'UPDATE_TASKS_ORDER', payload: { column, updatedTasks }
     }),
-    transferTask: (updatedTask, fromColumn) => ({
-        type: 'TRANSFER_TASK', payload: { updatedTask, fromColumn }
+    transferTask: (taskId, fromColumn, toColumn, order) => ({
+        type: 'TRANSFER_TASK', payload: { taskId, fromColumn, toColumn, order }
     }),
 };
 
