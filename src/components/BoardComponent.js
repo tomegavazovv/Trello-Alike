@@ -29,6 +29,8 @@ class BoardComponent extends Component {
 
         return boardElement;
     }
+
+
 }
 
 export default BoardComponent;

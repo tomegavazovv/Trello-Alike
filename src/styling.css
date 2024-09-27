@@ -10,6 +10,8 @@ body {
   display: flex;
   justify-content: space-around;
   gap: 20px;
+  position: relative;
+  margin-top: 50px;
 }
 
 .column {
@@ -112,4 +114,75 @@ body {
   cursor: text;
   outline: 2px solid #0079bf;
   padding: 2px;
+}
+
+.auth-form {
+  max-width: 300px;
+  margin: 50px auto;
+  padding: 20px;
+  background-color: #ebecf0;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.auth-form input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #dfe1e6;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.auth-form button {
+  width: 100%;
+  padding: 10px;
+  background-color: #0079bf;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.2s ease;
+}
+
+.auth-form button:hover {
+  background-color: #026aa7;
+}
+
+.auth-form a {
+  display: block;
+  text-align: center;
+  margin-top: 10px;
+  color: #0079bf;
+  text-decoration: none;
+  font-size: 12px
+}
+
+.auth-form a:hover {
+  text-decoration: underline;
+}
+
+.logout-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 8px 16px;
+  background-color: #0079bf;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
+}
+
+.logout-button:hover {
+  background-color: #b03a2e;
+}
+
+#error-message {
+  color: red;
+  font-size: 12px;
+  margin-top: 5px;
 }

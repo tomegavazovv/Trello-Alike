@@ -16,7 +16,7 @@ class ColumnComponent extends Component {
         if (isValidTask(value)) {
             input.value = '';
             const order = Math.max(...store.state.tasks[this.props.id].map(task => task.order)) + 1;
-            const newTask = await addTask(value, this.props.id, order);
+            const newTask = await addTask(value, this.props.id, order, store.state.user.uid);
             store.dispatch(actions.addTask(newTask, this.props.id));
         }
     }
@@ -43,7 +43,7 @@ class ColumnComponent extends Component {
         const toColumn = this.props.id;
         const order = Math.max(...store.state.tasks[toColumn].map(task => task.order)) + 1;
         store.dispatch(actions.transferTask(droppedTaskId, fromColumn, toColumn, order));
-        moveTaskToColumn(droppedTaskId, toColumn, order);
+        moveTaskToColumn(droppedTaskId, toColumn, order, store.state.user.uid);
     }
 
     handleDroppedInSameColumn = (event) => {
@@ -113,7 +113,6 @@ class ColumnComponent extends Component {
 
         return columnEl;
     }
-
 
 }
 

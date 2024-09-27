@@ -1,27 +1,26 @@
 import { deleteTask, saveTask, updateTask, updateTaskColumn, updateTasksOrder } from "../db/db.js"
 import { recalculateOrder } from "../utils/taskUtils.js";
-import store from "../store/store.js";
 
-export async function addTask(taskText, column, order) {
+export async function addTask(taskText, column, order, userId) {
     const task = {
         text: taskText,
         column,
-        order
+        order,
     };
 
-    const addedTask = await saveTask(task);
+    const addedTask = await saveTask(task, userId);
     return addedTask;
 }
 
-export function deleteTaskFromColumn(taskId) {
-    deleteTask(taskId);
+export function deleteTaskFromColumn(taskId, userId) {
+    deleteTask(taskId, userId);
 }
 
-export function updateTaskText(task) {
-    updateTask(task);
+export function updateTaskText(task, userId) {
+    updateTask(task, userId);
 }
 
-export function reorderTasks(tasks, droppedTaskId, targetTaskId) {
+export function reorderTasks(tasks, droppedTaskId, targetTaskId, userId) {
     const taskIndex = tasks.findIndex(task => task.id === droppedTaskId);
     const targetIndex = targetTaskId
         ? tasks.findIndex(task => task.id === targetTaskId)
@@ -31,17 +30,11 @@ export function reorderTasks(tasks, droppedTaskId, targetTaskId) {
     tasks.splice(targetIndex, 0, movedTask);
 
     const updatedTasks = recalculateOrder(tasks);
-    updateTasksOrder(updatedTasks);
+    updateTasksOrder(updatedTasks, userId);
     return updatedTasks;
 }
 
-export function moveTaskToColumn(taskId, newColumn, order) {
-    updateTaskColumn(taskId, newColumn, order);
+export function moveTaskToColumn(taskId, newColumn, order, userId) {
+    updateTaskColumn(taskId, newColumn, order, userId);
 }
 
-export function moveTaskToColumnEnd(taskId, column) {
-    const task = store.getTaskOfColumn(taskId, column);
-    task.order = Math.max(...store.getTasksOfColumn(column).map(t => t.order)) + 1;
-
-    updateTask(task);
-}

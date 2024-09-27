@@ -1,12 +1,16 @@
-const store = {
-    state: {
-        tasks: {
-            todo: [],
-            inprogress: [],
-            done: []
-        }
+const initialState = {
+    tasks: {
+        todo: [],
+        inprogress: [],
+        done: []
     },
+    user: null
+};
+
+const store = {
+    state: initialState,
     listeners: [],
+    loginUserListeners: [],
 
 
     setTasks(tasks) {
@@ -23,16 +27,16 @@ const store = {
 
     dispatch(action) {
         this.state = this.reducer(this.state, action);
-        this.notifyListeners();
+        if(action.type === 'SET_USER'){
+            this.notifyLoginUserListeners();
+        }else{
+            this.notifyListeners();
+        }
     },
 
     reducer(state, action) {
         switch (action.type) {
-
             case 'ADD_TASK':
-
-                console.trace('Dispatch call stack:');
-
                 return {
                     ...state,
                     tasks: {
@@ -71,7 +75,7 @@ const store = {
                 const taskIndex = fromTasks.findIndex(t => t.id === taskId);
 
                 if (taskIndex === -1) {
-                    return state; 
+                    return state;
                 }
 
                 const [task] = fromTasks.splice(taskIndex, 1);
@@ -83,6 +87,25 @@ const store = {
                         [toColumn]: [...toTasks, { ...task, column: toColumn, order }]
                     }
                 };
+            case 'SET_USER':
+                return {
+                    ...state,
+                    user: action.payload.user
+                };
+            case 'CLEAR_USER':
+                return {
+                    ...initialState,
+                };
+            case 'SET_AUTH_ERROR':
+                return {
+                    ...state,
+                    authError: action.payload.error
+                };
+            case 'REFRESH_TASKS':
+                return {
+                    ...state,
+                    tasks: action.payload.tasks
+                };
             default:
                 return state;
         }
@@ -92,12 +115,20 @@ const store = {
         this.listeners.push(listener);
     },
 
+    addLoginUserListener(listener) {
+        this.loginUserListeners.push(listener);
+    },
+
     removeListener(listener) {
         this.listeners = this.listeners.filter(l => l !== listener);
     },
 
     notifyListeners() {
         this.listeners.forEach(listener => listener());
+    },
+
+    notifyLoginUserListeners() {
+        this.loginUserListeners.forEach(listener => listener());
     }
 };
 
@@ -119,5 +150,17 @@ export const actions = {
     transferTask: (taskId, fromColumn, toColumn, order) => ({
         type: 'TRANSFER_TASK', payload: { taskId, fromColumn, toColumn, order }
     }),
+    setUser: (user) => ({
+        type: 'SET_USER', payload: { user }
+    }),
+    clearUser: () => ({
+        type: 'CLEAR_USER'
+    }),
+    setAuthError: (error) => ({
+        type: 'SET_AUTH_ERROR', payload: { error }
+    }),
+    refreshTasks: (tasks) => ({
+        type: 'REFRESH_TASKS', payload: { tasks }
+    })
 };
 

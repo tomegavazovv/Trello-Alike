@@ -4,41 +4,38 @@ const TASKS_KEY = 'tasks';
 
 class LocalStorageTaskRepository extends ITaskRepository {
 
-    async saveTask(task) {
-        const tasks = this._getTasksFromStorage();
+    async saveTask(task, userId) {
+        const tasks = this._getTasksFromStorage(userId);
         task.id = Math.random().toString(36).slice(2, 10);
         task.createdAt = new Date();
         task.updatedAt = new Date();
         tasks[task.column].push(task);
-        this._saveTasksToStorage(tasks);
+        this._saveTasksToStorage(tasks, userId);
         return task;
     }
 
-    async updateTask(task) {
-        console.log(task)
-
-        const tasks = this._getTasksFromStorage();
+    async updateTask(task, userId) {
+        const tasks = this._getTasksFromStorage(userId);
         for(const column in tasks) {
             const index = tasks[column].findIndex(t => t.id === task.id);
             if (index !== -1) {
-                console.log('Updating task', tasks[column][index])
                 tasks[column][index] = { ...tasks[column][index], ...task, updatedAt: new Date() };
-                this._saveTasksToStorage(tasks);
+                this._saveTasksToStorage(tasks, userId);
                 break;
             }
         }
     }
 
-    async deleteTask(taskId) {
-        const tasks = this._getTasksFromStorage();
+    async deleteTask(taskId, userId) {
+        const tasks = this._getTasksFromStorage(userId);
         for (const column in tasks) {
             tasks[column] = tasks[column].filter(task => task.id !== taskId);
         }
-        this._saveTasksToStorage(tasks);
+        this._saveTasksToStorage(tasks, userId);
     }
 
-    async getTasks() {
-        return this._getTasksFromStorage();
+    async getTasks(userId) {
+        return this._getTasksFromStorage(userId);
     }
 
     async updateTasksOrder(updatedTasks) {
@@ -53,7 +50,7 @@ class LocalStorageTaskRepository extends ITaskRepository {
         this._saveTasksToStorage(tasks);
     }
 
-    async updateTaskColumn(taskId, newColumn, order) {
+    async updateTaskColumn(taskId, newColumn, order, userId) {
         const tasks = this._getTasksFromStorage();
         let task;
         for (const column in tasks) {
@@ -71,8 +68,8 @@ class LocalStorageTaskRepository extends ITaskRepository {
         }
     }
 
-    async getTaskOrder(taskId) {
-        const tasks = this._getTasksFromStorage();
+    async getTaskOrder(taskId, userId) {
+        const tasks = this._getTasksFromStorage(userId);
         for (const column in tasks) {
             const task = tasks[column].find(t => t.id === taskId);
             if (task) {
@@ -82,25 +79,29 @@ class LocalStorageTaskRepository extends ITaskRepository {
         return null;
     }
 
-    async updateTaskOrder(taskId, newOrder) {
-        const tasks = this._getTasksFromStorage();
+    async updateTaskOrder(taskId, newOrder, userId) {
+        const tasks = this._getTasksFromStorage(userId);
         for (const column in tasks) {
             const task = tasks[column].find(t => t.id === taskId);
             if (task) {
                 task.order = newOrder;
-                this._saveTasksToStorage(tasks);
+                this._saveTasksToStorage(tasks, userId);
                 break;
             }
         }
     }
 
-    _getTasksFromStorage() {
-        const tasksJson = localStorage.getItem(TASKS_KEY);
-        return tasksJson ? JSON.parse(tasksJson) : { todo: [], inprogress: [], done: [] };
+    _getTasksFromStorage(userId) {
+        const allUsersTasksJson = localStorage.getItem(TASKS_KEY);
+        const allUsersTasks = allUsersTasksJson ? JSON.parse(allUsersTasksJson) : {};
+        return allUsersTasks[userId] || { todo: [], inprogress: [], done: [] };
     }
 
-    _saveTasksToStorage(tasks) {
-        localStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
+    _saveTasksToStorage(tasks, userId) {
+        const allUsersTasksJson = localStorage.getItem(TASKS_KEY);
+        const allUsersTasks = allUsersTasksJson ? JSON.parse(allUsersTasksJson) : {};
+        allUsersTasks[userId] = tasks;
+        localStorage.setItem(TASKS_KEY, JSON.stringify(allUsersTasks));
     }
 }
 

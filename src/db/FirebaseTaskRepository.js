@@ -1,33 +1,56 @@
 import ITaskRepository from './ITaskRepository';
 import { db } from '../firebaseConfig';
-import { collection, addDoc, deleteDoc, doc, updateDoc, getDocs, serverTimestamp, writeBatch, getDoc } from 'firebase/firestore';
+import { collection, addDoc, deleteDoc, doc, updateDoc, getDocs, serverTimestamp, writeBatch, getDoc, query, where } from 'firebase/firestore';
 
 const TASKS_COLLECTION = 'tasks';
 
 class FirebaseTaskRepository extends ITaskRepository {
-    
-    async saveTask(task) {
+    constructor() {
+        super();
+    }
+
+    async saveTask(task, userId) {
+        console.log('saveTask')
         task.createdAt = new Date();
         task.updatedAt = new Date();
 
-        const docRef = await addDoc(collection(db, TASKS_COLLECTION), task);
+        const docRef = await addDoc(collection(db, TASKS_COLLECTION), { ...task, userId });
         const addedTask = { id: docRef.id, ...task };
         return addedTask;
     }
 
-    async updateTask(task) {
-        await updateDoc(doc(db, TASKS_COLLECTION, task.id), {
-            ...task,
-            updatedAt: serverTimestamp()
-        });
+    async updateTask(task, userId) {
+        const taskRef = doc(db, TASKS_COLLECTION, task.id);
+
+        const taskDoc = await getDoc(taskRef);
+
+        if (this.isUserOwnerOfTask(taskDoc, userId)) {
+            await updateDoc(taskRef, {
+                ...task,
+                updatedAt: serverTimestamp()
+            });
+        } else {
+            throw new Error("Task not found or you don't have permission to update it");
+        }
     }
 
-    async deleteTask(taskId) {
-        await deleteDoc(doc(db, TASKS_COLLECTION, taskId));
+    async deleteTask(taskId, userId) {
+        console.log(taskId, userId)
+        const taskRef = doc(db, TASKS_COLLECTION, taskId);
+        const taskDoc = await getDoc(taskRef);
+
+        if (this.isUserOwnerOfTask(taskDoc, userId)) {
+            await deleteDoc(taskRef);
+        } else {
+            throw new Error("Task not found or you don't have permission to delete it");
+        }
     }
 
-    async getTasks() {
-        const tasksSnapshot = await getDocs(collection(db, TASKS_COLLECTION));
+    async getTasks(userId) {
+        const tasksRef = collection(db, TASKS_COLLECTION);
+        const q = query(tasksRef, where('userId', '==', userId));
+        const tasksSnapshot = await getDocs(q);
+
         const tasks = { todo: [], inprogress: [], done: [] };
         tasksSnapshot.forEach(doc => {
             const task = { id: doc.id, ...doc.data() };
@@ -37,13 +60,10 @@ class FirebaseTaskRepository extends ITaskRepository {
     }
 
     async updateTasksOrder(updatedTasks) {
-        updatedTasks.forEach(task => {
-            console.log(task.text)
-        })
         const batch = writeBatch(db);
         updatedTasks.forEach(task => {
             const taskRef = doc(db, TASKS_COLLECTION, task.id);
-            batch.update(taskRef, { 
+            batch.update(taskRef, {
                 order: task.order,
                 updatedAt: serverTimestamp()
             });
@@ -52,12 +72,18 @@ class FirebaseTaskRepository extends ITaskRepository {
         console.log('Tasks updated successfully');
     }
 
-    async updateTaskColumn(taskId, newColumn, order) {
-        await updateDoc(doc(db, TASKS_COLLECTION, taskId), {
-            column: newColumn,
-            order,
-            updatedAt: serverTimestamp()
-        });
+    async updateTaskColumn(taskId, newColumn, order, userId) {
+        const taskRef = doc(db, TASKS_COLLECTION, taskId);
+        const taskDoc = await getDoc(taskRef);
+        if (this.isUserOwnerOfTask(taskDoc, userId)) {
+            await updateDoc(taskRef, {
+                column: newColumn,
+                order,
+                updatedAt: serverTimestamp()
+            });
+        } else {
+            throw new Error("Task not found or you don't have permission to update it");
+        }
     }
 
     async getTaskOrder(taskId) {
@@ -67,7 +93,18 @@ class FirebaseTaskRepository extends ITaskRepository {
     }
 
     async updateTaskOrder(taskId, newOrder) {
-        await updateDoc(doc(db, TASKS_COLLECTION, taskId), { order: newOrder });
+        const taskRef = doc(db, TASKS_COLLECTION, taskId);
+        const taskDoc = await getDoc(taskRef);
+
+        if (this.isUserOwnerOfTask(taskDoc)) {
+            await updateDoc(taskRef, { order: newOrder });
+        } else {
+            throw new Error("Task not found or you don't have permission to update it");
+        }
+    }
+
+    isUserOwnerOfTask(taskDoc, userId) {
+        return taskDoc.exists() && taskDoc.data().userId === userId;
     }
 }
 

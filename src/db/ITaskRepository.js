@@ -2,17 +2,17 @@
  * @interface ITaskRepository
  */
 class ITaskRepository {
-    async saveTask(task) {}
+    async saveTask(task, userId) {}
 
-    async updateTask(task) {}
+    async updateTask(task, userId) {}
 
-    async deleteTask(taskId) {}
+    async deleteTask(taskId, userId) {}
 
-    async getTasks() {}
+    async getTasks(userId) {}
 
     async updateTasksOrder(updatedTasks) {}
 
-    async updateTaskColumn(taskId, newColumn, order) {}
+    async updateTaskColumn(taskId, newColumn, order, userId) {}
 
     async getTaskOrder(taskId) {}
 
