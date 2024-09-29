@@ -1,5 +1,7 @@
-import store, { actions } from '../store/store.js';
-import {  deleteTaskFromColumn, updateTaskText } from '../service/taskService.js';
+import store from '../store/store.js';
+import { actions } from '../store/actions.js';
+import { taskSelector, userIdSelector, useSelector } from '../store/store.js';
+import { deleteTaskFromColumn, updateTaskText } from '../service/taskService.js';
 import Component from './Component';
 
 class TaskComponent extends Component {
@@ -7,9 +9,14 @@ class TaskComponent extends Component {
         super(props);
     }
 
+    setState() {
+        this.userId = useSelector(userIdSelector(), this)
+        this.task = useSelector(taskSelector(this.props.task.id, this.props.task.column), this)
+    }
+
     handleDelete = () => {
-        store.dispatch(actions.deleteTask(this.props.task.id, this.props.task.column));
-        deleteTaskFromColumn(this.props.task.id, store.state.user.uid);
+        store.dispatch(actions.deleteTask(this.task.id, this.task.column));
+        deleteTaskFromColumn(this.task.id, this.userId);
     }
 
     handleDoubleClick = (event) => {
@@ -20,19 +27,19 @@ class TaskComponent extends Component {
     handleBlur = async (event) => {
         event.target.contentEditable = false;
         const updatedText = event.target.textContent.trim();
-        if (updatedText !== this.props.task.text) {
+        if (updatedText !== this.task.text) {
             const updatedTask = {
-                ...this.props.task,
+                ...this.task,
                 text: updatedText,
             };
             store.dispatch(actions.updateTask(updatedTask));
-            updateTaskText(updatedTask, store.state.user.uid);
+            updateTaskText(updatedTask, this.userId);
         }
     }
 
     handleDragStart = (event) => {
         event.dataTransfer.setData('id', event.target.id);
-        event.dataTransfer.setData('fromColumn', this.props.task.column);
+        event.dataTransfer.setData('fromColumn', this.task.column);
         event.target.classList.add('dragging');
     }
 
@@ -40,24 +47,23 @@ class TaskComponent extends Component {
         event.target.classList.remove('dragging');
     }
 
-    render() {
-        const { task } = this.props;
+    _render() {
         const taskEl = document.createElement('div');
         taskEl.className = 'task';
-        taskEl.id = task.id;
+        taskEl.id = this.task.id;
         taskEl.draggable = true;
 
         const taskTextEl = document.createElement('span');
         taskTextEl.className = 'task-text';
-        taskTextEl.id = `task-text-${task.id}`;
-        taskTextEl.textContent = task.text;
-        taskTextEl.dataset.originalText = task.text;
+        taskTextEl.id = `task-text-${this.task.id}`;
+        taskTextEl.textContent = this.task.text;
+        taskTextEl.dataset.originalText = this.task.text;
         taskTextEl.addEventListener('dblclick', this.handleDoubleClick);
         taskTextEl.addEventListener('blur', this.handleBlur);
 
         const deleteBtnEl = document.createElement('button');
         deleteBtnEl.className = 'delete-btn';
-        deleteBtnEl.id = `delete-${task.id}`;
+        deleteBtnEl.id = `delete-${this.task.id}`;
         deleteBtnEl.textContent = 'X';
         deleteBtnEl.addEventListener('click', this.handleDelete);
 

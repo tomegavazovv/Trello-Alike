@@ -1,7 +1,8 @@
+import { DB_MODE } from '../config/config';
 import TaskRepositoryFactory from './TaskRepositoryFactory';
 
 // firebase or locaStorage
-const repository = TaskRepositoryFactory.getRepository('firebase'); 
+const repository = TaskRepositoryFactory.getRepository(DB_MODE); 
 
 export const saveTask = repository.saveTask.bind(repository);
 export const updateTask = repository.updateTask.bind(repository);

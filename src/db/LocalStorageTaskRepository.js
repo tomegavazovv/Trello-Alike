@@ -35,6 +35,7 @@ class LocalStorageTaskRepository extends ITaskRepository {
     }
 
     async getTasks(userId) {
+        console.log('gettasks')
         return this._getTasksFromStorage(userId);
     }
 

@@ -1,6 +1,7 @@
 import Component from './Component.js';
 import { registerUser } from '../service/authService.js';
-import store, { actions } from '../store/store.js';
+import store from '../store/store.js';
+import { actions } from '../store/actions.js';
 
 class RegisterComponent extends Component {
     constructor(props) {
@@ -20,7 +21,7 @@ class RegisterComponent extends Component {
         }
     }
 
-    render() {
+    _render() {
         const registerForm = document.createElement('form');
         registerForm.className = 'auth-form';
 

@@ -6,7 +6,7 @@ body {
   color: #172b4d;
 }
 
-.board {
+.board .columns {
   display: flex;
   justify-content: space-around;
   gap: 20px;
@@ -29,7 +29,7 @@ body {
   margin-bottom: 16px;
 }
 
-.tasks{
+.tasks {
   display: flex;
   flex-direction: column;
 }

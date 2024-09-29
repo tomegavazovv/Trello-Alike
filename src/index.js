@@ -1,8 +1,9 @@
 import './styling.css';
-import store, { actions } from './store/store.js';
+import store from './store/store.js';
 import { getTasks } from './db/db.js';
 import AppComponent from './components/AppComponent.js';
 import { getCurrentUser } from './service/authService.js';
+import { actions } from './store/actions.js';
 
 init()
 
@@ -16,14 +17,13 @@ async function init() {
   const appComponent = new AppComponent();
   appComponent.mount();
 
-  store.addLoginUserListener(async () => {
-    await refreshTasks(store.state.user.uid);
-  })
-
   store.addListener(() => {
     appComponent.mount();
   });
 
+  store.addLoginUserListener(async () => {
+    await refreshTasks(store.state.user.uid);
+  })
 }
 
 async function refreshTasks(userId) {

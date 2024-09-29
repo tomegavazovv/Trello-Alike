@@ -1,3 +1,5 @@
+import { getChangedFields } from "./utils";
+
 const initialState = {
     tasks: {
         todo: [],
@@ -11,7 +13,7 @@ const store = {
     state: initialState,
     listeners: [],
     loginUserListeners: [],
-
+    componentListeners: {},
 
     setTasks(tasks) {
         this.state.tasks = tasks
@@ -26,10 +28,20 @@ const store = {
     },
 
     dispatch(action) {
+        const prevState = JSON.parse(JSON.stringify(this.state));
         this.state = this.reducer(this.state, action);
-        if(action.type === 'SET_USER'){
+
+        const changedFields = [...new Set(getChangedFields(prevState, this.state))];
+        for (const field of changedFields) {
+            const components = this.componentListeners[field] || [];
+            for (const component of components) {
+                component.componentDidUpdate()
+            }
+        }
+
+        if (action.type === 'SET_USER') {
             this.notifyLoginUserListeners();
-        }else{
+        } else {
             this.notifyListeners();
         }
     },
@@ -115,6 +127,13 @@ const store = {
         this.listeners.push(listener);
     },
 
+    addComponentListener(selector, component) {
+        if (!this.componentListeners[selector]) {
+            this.componentListeners[selector] = [];
+        }
+        this.componentListeners[selector].push(component);
+    },
+
     addLoginUserListener(listener) {
         this.loginUserListeners.push(listener);
     },
@@ -128,39 +147,38 @@ const store = {
     },
 
     notifyLoginUserListeners() {
+        this.componentListeners['user.uid'] && this.componentListeners['user.uid'].forEach(comp => comp.componentDidUpdate());
         this.loginUserListeners.forEach(listener => listener());
     }
 };
 
 export default store;
 
-export const actions = {
-    addTask: (task, column) => ({
-        type: 'ADD_TASK', payload: { task, column }
-    }),
-    deleteTask: (taskId, column) => ({
-        type: 'DELETE_TASK', payload: { taskId, column }
-    }),
-    updateTask: (task) => ({
-        type: 'UPDATE_TASK', payload: { task }
-    }),
-    updateTasksOrder: (updatedTasks, column) => ({
-        type: 'UPDATE_TASKS_ORDER', payload: { column, updatedTasks }
-    }),
-    transferTask: (taskId, fromColumn, toColumn, order) => ({
-        type: 'TRANSFER_TASK', payload: { taskId, fromColumn, toColumn, order }
-    }),
-    setUser: (user) => ({
-        type: 'SET_USER', payload: { user }
-    }),
-    clearUser: () => ({
-        type: 'CLEAR_USER'
-    }),
-    setAuthError: (error) => ({
-        type: 'SET_AUTH_ERROR', payload: { error }
-    }),
-    refreshTasks: (tasks) => ({
-        type: 'REFRESH_TASKS', payload: { tasks }
-    })
+export const tasksSelector = () => () => 'tasks';
+
+export const tasksColumnSelector = (column) => {
+    return () => `tasks.${column}`
 };
 
+export const userIdSelector = () => () => 'user.uid';
+
+export const taskSelector = (taskId, column) => {
+    const index = store.state.tasks[column].findIndex(task => task.id == taskId)
+    return () => `tasks.${column}[${index}]`;
+}
+
+export const useSelector = (selector, component) => {
+    const selectorKey = selector();
+    if (!store.componentListeners[selectorKey]) {
+        store.componentListeners[selectorKey] = [];
+    }
+    
+    if (!store.componentListeners[selectorKey].find(c => c.id === component.id)) {
+        store.componentListeners[selectorKey].push(component);
+    }
+    try{
+        return eval(`store.state.${selectorKey}`)
+    } catch (e) {
+        return null
+    }
+}

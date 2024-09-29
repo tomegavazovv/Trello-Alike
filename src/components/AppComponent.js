@@ -1,5 +1,6 @@
 import { logoutUser } from '../service/authService.js';
-import store, { actions } from '../store/store.js';
+import { actions, clearUser, setAuthError } from '../store/actions.js';
+import store from '../store/store.js';
 import BoardComponent from './BoardComponent.js';
 import Component from './Component.js';
 import LoginComponent from './LoginComponent.js';
@@ -20,7 +21,7 @@ class AppComponent extends Component {
     }
 
     switchAuthState = () => {
-        if(store.state.authError){
+        if (store.state.authError) {
             store.dispatch(actions.setAuthError(null));
         }
         this.isRegistering = !this.isRegistering;
@@ -28,7 +29,7 @@ class AppComponent extends Component {
     }
 
     handleLogout = () => {
-        try{
+        try {
             logoutUser();
             store.dispatch(actions.clearUser());
         } catch (error) {
@@ -36,32 +37,32 @@ class AppComponent extends Component {
         }
     }
 
-    render() {
+    renderAuth(){
+        if(this.isRegistering){
+            return this.registerComponent.renderComponent()
+        }
+        return this.loginComponent.renderComponent()
+    }
+
+    _render() {
         if (store.state.user) {
-            console.log(store.state.user)
             const container = document.createElement('div');
             const logoutButton = document.createElement('button');
             logoutButton.textContent = 'Logout';
             logoutButton.addEventListener('click', this.handleLogout);
             logoutButton.className = 'logout-button';
             container.appendChild(logoutButton);
-            container.appendChild(this.boardComponent.render());
-            return container;
+            container.appendChild(this.boardComponent.renderComponent());
+            return container
         } else {
-            return this.isRegistering 
-                ? this.registerComponent.render() 
-                : this.loginComponent.render();
+            return this.renderAuth()
         }
     }
 
-    setState(newState) {
-        this.state = { ...this.state, ...newState };
-        this.mount();
-    }
-
     mount() {
-        document.body.innerHTML = '';
-        document.body.appendChild(this.render());
+        const root = document.querySelector('.root');
+        root.innerHTML = '';
+        root.appendChild(this.renderComponent());
     }
 }
 

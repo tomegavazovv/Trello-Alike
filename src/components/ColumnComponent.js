@@ -1,13 +1,21 @@
 import Component from './Component.js';
 import TaskListComponent from './TaskListComponent.js';
 import { isValidTask } from '../utils/taskUtils.js';
-import { addTask, moveTaskToColumn, reorderTasks } from '../service/taskService.js';
-import store, { actions } from '../store/store.js';
+import { addTask, reorderTasks } from '../service/taskService.js';
+import store, { tasksColumnSelector, userIdSelector, useSelector } from '../store/store.js';
 import { getNearestElementByMouseY } from '../utils/domUtils.js';
-
+import { actions } from '../store/actions.js';
 class ColumnComponent extends Component {
     constructor(props) {
         super(props);
+        this.childComponents = [new TaskListComponent({
+            columnId: this.props.id
+        })]
+    }
+
+    setState() {
+        this.state.tasks = useSelector(tasksColumnSelector(this.props.id), this)
+        this.userId = useSelector(userIdSelector(), this)
     }
 
     handleAddTask = async (event) => {
@@ -15,9 +23,9 @@ class ColumnComponent extends Component {
         const value = input.value.trim();
         if (isValidTask(value)) {
             input.value = '';
-            const order = Math.max(...store.state.tasks[this.props.id].map(task => task.order)) + 1;
-            const newTask = await addTask(value, this.props.id, order, store.state.user.uid);
-            store.dispatch(actions.addTask(newTask, this.props.id));
+            const order = Math.max(this.state.tasks.map(task => task.order)) + 1;
+            const newTask = await addTask(value, this.props.id, order, this.userId);
+            store.dispatch(addTask(newTask, this.props.id));
         }
     }
 
@@ -31,19 +39,10 @@ class ColumnComponent extends Component {
         const toColumn = this.props.id;
 
         if (fromColumn !== toColumn) {
-            this.handleDroppedInDifferentColumn(event);
+            this.props.handleDroppedInDifferentColumn(event, toColumn);
         } else {
             this.handleDroppedInSameColumn(event);
         }
-    }
-
-    handleDroppedInDifferentColumn = (event) => {
-        const droppedTaskId = event.dataTransfer.getData("id");
-        const fromColumn = event.dataTransfer.getData("fromColumn");
-        const toColumn = this.props.id;
-        const order = Math.max(...store.state.tasks[toColumn].map(task => task.order)) + 1;
-        store.dispatch(actions.transferTask(droppedTaskId, fromColumn, toColumn, order));
-        moveTaskToColumn(droppedTaskId, toColumn, order, store.state.user.uid);
     }
 
     handleDroppedInSameColumn = (event) => {
@@ -87,31 +86,39 @@ class ColumnComponent extends Component {
         return addTaskEl;
     }
 
-    render = () => {
-        const columnEl = document.createElement('div');
-        columnEl.className = 'column';
-        columnEl.id = this.props.id;
+    renderChildren = () => {
+        return this.childComponents.map(child => child.renderComponent());
+    }
 
-        columnEl.addEventListener('dragover', this.handleDragOver);
-        columnEl.addEventListener('drop', this.handleDrop);
+    _render = () => {
+        if (this.dirty || !this.isMounted) {
+            this.element = document.createElement('div');
+            this.element.className = 'column';
+            this.element.id = this.props.id;
+
+            this.element.addEventListener('dragover', this.handleDragOver);
+            this.element.addEventListener('drop', this.handleDrop);
+            this.dynamicWrapper = document.createElement('div');
+            this.dynamicWrapper.className = 'tasks';
+            this.element.appendChild(this.dynamicWrapper);
+        }
+        this.dynamicWrapper.replaceChildren([])
 
         const titleEl = document.createElement('h2');
         titleEl.textContent = this.props.title;
-        columnEl.appendChild(titleEl);
+        this.dynamicWrapper.appendChild(titleEl);
 
-        const taskListComponent = new TaskListComponent({
-            tasks: this.props.tasks,
-            columnId: this.props.id
+        const children = this.renderChildren()
+        children.forEach(child => {
+            this.dynamicWrapper.appendChild(child)
         });
-
-        columnEl.appendChild(taskListComponent.render());
 
         if (this.props.id === 'todo') {
             const addTaskEl = this.renderAddTask();
-            columnEl.appendChild(addTaskEl);
+            this.dynamicWrapper.appendChild(addTaskEl);
         }
 
-        return columnEl;
+        return this.element;
     }
 
 }

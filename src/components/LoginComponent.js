@@ -1,7 +1,7 @@
 import Component from './Component.js';
 import { loginUser } from '../service/authService.js';
-import store, { actions } from '../store/store.js';
-
+import store from '../store/store.js';
+import { actions } from '../store/actions.js';
 class LoginComponent extends Component {
     constructor(props) {
         super(props);
@@ -14,7 +14,7 @@ class LoginComponent extends Component {
 
         try {
             const userCredential = await loginUser(email, password);
-            
+
             store.dispatch(actions.setAuthError(null));
             store.dispatch(actions.setUser(userCredential.user));
         } catch (error) {
@@ -22,7 +22,7 @@ class LoginComponent extends Component {
         }
     }
 
-    render() {
+    _render() {
         const loginForm = document.createElement('form');
         loginForm.className = 'auth-form';
     
