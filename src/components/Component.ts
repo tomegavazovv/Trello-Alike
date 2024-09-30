@@ -29,7 +29,7 @@ abstract class Component {
         return element
     }
 
-    componentDidUpdate() {
+    componentDidUpdate(): void {
         this.dirty = true;
         this.setState();
     }

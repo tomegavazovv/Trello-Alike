@@ -1,56 +1,49 @@
 import ITaskRepository from './ITaskRepository';
-import { db } from '../firebaseConfig';
-import { collection, addDoc, deleteDoc, doc, updateDoc, getDocs, serverTimestamp, writeBatch, getDoc, query, where, DocumentSnapshot } from 'firebase/firestore';
+import { auth, db } from '../firebaseConfig';
+import { collection, deleteDoc, doc, updateDoc, getDocs, serverTimestamp, writeBatch, getDoc, query, where, setDoc } from 'firebase/firestore';
 import { Task, TaskColumns, TaskInput } from '../models/Task';
+import DatabaseError from '../errors/DatabaseError';
 
 const TASKS_COLLECTION = 'tasks';
 
 class FirebaseTaskRepository implements ITaskRepository {
-    saveTask = async (task: TaskInput, userId: string): Promise<Task> => {
+    saveTask = (task: TaskInput): Task => {
+        const userId = auth.currentUser.uid;
+        const newDocRef = doc(collection(db, TASKS_COLLECTION));
+        const newTaskId = newDocRef.id;
+
         const newTask: Task = {
             ...task,
+            id: newTaskId,
+            userId,
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp()
         }
-
-        const docRef = await addDoc(collection(db, TASKS_COLLECTION), { ...newTask, userId });
-        const addedTask = { id: docRef.id, ...newTask };
-        return addedTask;
+        setDoc(newDocRef, newTask);
+        return newTask;
     }
 
-    updateTask = async (task: Task, userId: string): Promise<Task> => {
+    updateTask = async (task: Task): Promise<Task> => {
         const taskRef = doc(db, TASKS_COLLECTION, task.id);
+        await updateDoc(taskRef, {
+            ...task,
+            updatedAt: serverTimestamp()
+        });
 
-        const taskDoc = await getDoc(taskRef);
+        return { id: task.id, ...task };
 
-        if (this.isUserOwnerOfTask(taskDoc, userId)) {
-            await updateDoc(taskRef, {
-                ...task,
-                updatedAt: serverTimestamp()
-            });
-
-            return { id: task.id, ...task };
-        } else {
-            throw new Error("Task not found or you don't have permission to update it");
-        }
     }
 
-    deleteTask = async (taskId: string, userId: string): Promise<void> => {
+    deleteTask = async (taskId: string): Promise<void> => {
         const taskRef = doc(db, TASKS_COLLECTION, taskId);
-        const taskDoc = await getDoc(taskRef);
-
-        if (this.isUserOwnerOfTask(taskDoc, userId)) {
-            await deleteDoc(taskRef);
-        } else {
-            throw new Error("Task not found or you don't have permission to delete it");
-        }
+        await deleteDoc(taskRef);
     }
 
     getTasks = async (userId: string): Promise<TaskColumns> => {
         const tasksRef = collection(db, TASKS_COLLECTION);
         const q = query(tasksRef, where('userId', '==', userId));
         const tasksSnapshot = await getDocs(q);
-        
+
         const tasks: TaskColumns = {
             todo: [],
             inprogress: [],
@@ -64,7 +57,7 @@ class FirebaseTaskRepository implements ITaskRepository {
         return tasks;
     }
 
-    updateTasksOrder = async (updatedTasks: Task[], userId: string): Promise<void> => {
+    updateTasksOrder = async (updatedTasks: Task[]): Promise<void> => {
         const batch = writeBatch(db);
         updatedTasks.forEach(task => {
             const taskRef = doc(db, TASKS_COLLECTION, task.id);
@@ -74,44 +67,31 @@ class FirebaseTaskRepository implements ITaskRepository {
             });
         });
         await batch.commit();
-        console.log('Tasks updated successfully');
     }
 
-    updateTaskColumn = async (taskId: string, newColumn: string, order: number, userId: string): Promise<Task> => {
+    updateTaskColumn = async (taskId: string, newColumn: string, order: number): Promise<Task> => {
         const taskRef = doc(db, TASKS_COLLECTION, taskId);
         const taskDoc = await getDoc(taskRef);
-        if (this.isUserOwnerOfTask(taskDoc, userId)) {
-            await updateDoc(taskRef, {
-                column: newColumn,
-                order,
-                updatedAt: serverTimestamp()
-            });
-            return { id: taskId, ...taskDoc.data() } as Task;
-        } else {
-            throw new Error("Task not found or you don't have permission to update it");
-        }
+        await updateDoc(taskRef, {
+            column: newColumn,
+            order,
+            updatedAt: serverTimestamp()
+        });
+        return { id: taskId, ...taskDoc.data() } as Task;
     }
 
-    getTaskOrder = async (taskId: string, userId: string): Promise<number> => {
+    getTaskOrder = async (taskId: string): Promise<number> => {
         const docRef = doc(db, TASKS_COLLECTION, taskId);
         const docSnap = await getDoc(docRef);
         return docSnap.data().order;
     }
 
-    updateTaskOrder = async (taskId: string, newOrder: number, userId: string): Promise<Task> => {
+    updateTaskOrder = async (taskId: string, newOrder: number): Promise<Task> => {
         const taskRef = doc(db, TASKS_COLLECTION, taskId);
         const taskDoc = await getDoc(taskRef);
 
-        if (this.isUserOwnerOfTask(taskDoc, userId)) {
-            await updateDoc(taskRef, { order: newOrder });
-            return { id: taskId, ...taskDoc.data() } as Task;
-        } else {
-            throw new Error("Task not found or you don't have permission to update it");
-        }
-    }
-
-    isUserOwnerOfTask = (taskDoc: DocumentSnapshot, userId: string): boolean => {
-        return taskDoc.exists() && taskDoc.data().userId === userId;
+        await updateDoc(taskRef, { order: newOrder });
+        return { id: taskId, ...taskDoc.data() } as Task;
     }
 }
 

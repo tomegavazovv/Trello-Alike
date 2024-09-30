@@ -31,7 +31,10 @@ class BoardComponent extends Component {
         const fromColumn = event.dataTransfer.getData("fromColumn") as Column;
         const order = Math.max(...this.state.tasks[toColumn].map(task => task.order)) + 1;
         store.dispatch(actions.transferTask(droppedTaskId, fromColumn, toColumn, order));
-        moveTaskToColumn(droppedTaskId, toColumn, order, this.state.userId);
+        moveTaskToColumn(droppedTaskId, toColumn, order).catch((error: any) => {
+            store.dispatch(actions.transferTask(droppedTaskId, toColumn, fromColumn, order));
+            store.dispatch(actions.setAppError('Something went wrong. Please try again later.'));
+        });
     }
 
     renderChildren(): HTMLElement[] {

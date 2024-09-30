@@ -10,6 +10,7 @@ export const SET_USER = 'SET_USER';
 export const CLEAR_USER = 'CLEAR_USER';
 export const SET_AUTH_ERROR = 'SET_AUTH_ERROR';
 export const REFRESH_TASKS = 'REFRESH_TASKS';
+export const SET_APP_ERROR = 'SET_APP_ERROR';
 
 export type Action =
     | { type: typeof ADD_TASK; payload: { task: TaskInput; column: Column } }
@@ -20,7 +21,8 @@ export type Action =
     | { type: typeof SET_USER; payload: { user: User } }
     | { type: typeof CLEAR_USER }
     | { type: typeof SET_AUTH_ERROR; payload: { error: string } }
-    | { type: typeof REFRESH_TASKS; payload: { tasks: TaskColumns } };
+    | { type: typeof REFRESH_TASKS; payload: { tasks: TaskColumns } }
+    | { type: typeof SET_APP_ERROR; payload: { error: string | null } };
 
 export const actions = {
     addTask: (task: TaskInput, column: Column): Action => ({ 
@@ -55,5 +57,9 @@ export const actions = {
     refreshTasks: (tasks: TaskColumns): Action => ({ 
         type: REFRESH_TASKS, 
         payload: { tasks } 
+    }),
+    setAppError: (error: string | null): Action => ({ 
+        type: SET_APP_ERROR, 
+        payload: { error } 
     })
 };

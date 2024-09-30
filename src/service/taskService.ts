@@ -2,28 +2,26 @@ import { deleteTask, saveTask, updateTask, updateTaskColumn, updateTasksOrder } 
 import { TaskInput, Column, Task, TaskColumns } from "../models/Task";
 import { recalculateOrder } from "../utils/taskUtils";
 import { getTasks as getTasksFromDb } from "../db/db";
+import { auth } from "../firebaseConfig";
 
-export async function addTask(taskText: string, column: Column, order: number, userId: string) {
-
+export function addTask(taskText: string, column: Column, order: number): Task {
     const task: TaskInput = {
         text: taskText,
         column: column,
         order,
     };
-
-    const addedTask = await saveTask(task, userId);
-    return addedTask;
+    return saveTask(task);
 }
 
-export function deleteTaskFromColumn(taskId: string, userId: string) {
-    deleteTask(taskId, userId);
+export function deleteTaskFromColumn(taskId: string): Promise<void> {
+    return deleteTask(taskId);
 }
 
-export function updateTaskText(task: Task, userId: string) {
-    updateTask(task, userId);
+export function updateTaskText(task: Task): Promise<Task> {
+    return updateTask(task);
 }
 
-export function reorderTasks(tasks: Task[], droppedTaskId: string, targetTaskId: string, userId: string) {
+export function reorderTasks(tasks: Task[], droppedTaskId: string, targetTaskId: string): Task[] {
     const taskIndex = tasks.findIndex(task => task.id === droppedTaskId);
     const targetIndex = targetTaskId
         ? tasks.findIndex(task => task.id === targetTaskId)
@@ -33,14 +31,14 @@ export function reorderTasks(tasks: Task[], droppedTaskId: string, targetTaskId:
     tasks.splice(targetIndex, 0, movedTask);
 
     const updatedTasks = recalculateOrder(tasks);
-    updateTasksOrder(updatedTasks, userId);
+    updateTasksOrder(updatedTasks);
     return updatedTasks;
 }
 
-export function moveTaskToColumn(taskId: string, newColumn: Column, order: number, userId: string) {
-    updateTaskColumn(taskId, newColumn, order, userId);
+export function moveTaskToColumn(taskId: string, newColumn: Column, order: number): Promise<Task> {
+    return updateTaskColumn(taskId, newColumn, order);
 }
 
-export function getTasks(userId: string): Promise<TaskColumns> {
-    return getTasksFromDb(userId);
+export function getTasks(): Promise<TaskColumns> {
+    return getTasksFromDb(auth.currentUser.uid);
 }

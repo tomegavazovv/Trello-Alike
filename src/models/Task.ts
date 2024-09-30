@@ -7,9 +7,9 @@ export interface Task {
     text: string,
     order: number,
     column: Column,
-    userId?: string,
     updatedAt: Date | FieldValue,
-    createdAt: Date | FieldValue
+    createdAt: Date | FieldValue,
+    userId: string
 }
 
 export interface TaskInput {

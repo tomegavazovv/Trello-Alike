@@ -1,10 +1,12 @@
+import { User } from '@firebase/auth';
 import { logoutUser } from '../service/authService';
 import { actions } from '../store/actions';
-import store from '../store/store';
+import store, { appErrorSelector, userIdSelector, useSelector } from '../store/store';
 import BoardComponent from './BoardComponent';
 import Component from './Component';
 import LoginComponent from './LoginComponent';
 import RegisterComponent from './RegisterComponent';
+import CardComponent from './CardComponent';
 
 class AppComponent extends Component {
     private columns: { id: string, title: string }[];
@@ -12,6 +14,10 @@ class AppComponent extends Component {
     private loginComponent: LoginComponent;
     private registerComponent: RegisterComponent;
     private isRegistering: boolean;
+    state: {
+        user: User | null;
+        appError: string | null;
+    }
 
     constructor() {
         super();
@@ -24,6 +30,11 @@ class AppComponent extends Component {
         this.loginComponent = new LoginComponent({ onSwitchToRegister: this.switchAuthState });
         this.registerComponent = new RegisterComponent({ onSwitchToLogin: this.switchAuthState });
         this.isRegistering = false;
+    }
+
+    setState(): void {
+        this.state.user = useSelector(userIdSelector(), this)
+        this.state.appError = useSelector(appErrorSelector(), this)
     }
 
     switchAuthState = (): void => {
@@ -58,6 +69,10 @@ class AppComponent extends Component {
             logoutButton.addEventListener('click', this.handleLogout);
             logoutButton.className = 'logout-button';
             container.appendChild(logoutButton);
+            if (this.state.appError) {
+                const errorCard = new CardComponent({ error: this.state.appError });
+                container.appendChild(errorCard.renderComponent());
+            }
             container.appendChild(this.boardComponent.renderComponent());
             return container
         } else {

@@ -22,7 +22,7 @@ class TaskComponent extends Component {
 
     handleDelete = (): void => {
         store.dispatch(actions.deleteTask(this.state.task.id, this.state.task.column));
-        deleteTaskFromColumn(this.state.task.id, this.state.userId);
+        deleteTaskFromColumn(this.state.task.id);
     }
 
     handleDoubleClick = (event: Event): void => {
@@ -41,7 +41,7 @@ class TaskComponent extends Component {
                 text: updatedText,
             };
             store.dispatch(actions.updateTask(updatedTask));
-            updateTaskText(updatedTask, this.state.userId);
+            updateTaskText(updatedTask);
         }
     }
 

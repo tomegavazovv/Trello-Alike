@@ -1,49 +1,51 @@
 import { Task, TaskColumns, TaskInput } from '../models/Task';
+import store from '../store/store';
 import ITaskRepository from './ITaskRepository';
 
 const TASKS_KEY = 'tasks';
 
 class LocalStorageTaskRepository implements ITaskRepository {
 
-    async saveTask(task: TaskInput, userId: string): Promise<Task> {
-        const tasks = this._getTasksFromStorage(userId);
+    saveTask(task: TaskInput): Task {
+        const tasks = this._getTasksFromStorage();
         const newTask: Task = {
             ...task,
+            userId: store.state.user.uid,
             createdAt: new Date(),  
             updatedAt: new Date()
         }
         tasks[task.column].push(newTask);
-        this._saveTasksToStorage(tasks, userId);
+        this._saveTasksToStorage(tasks);
         return newTask;
     }
 
-    async updateTask(task: Task, userId: string): Promise<Task> {
-        const tasks = this._getTasksFromStorage(userId);
+    async updateTask(task: Task): Promise<Task> {
+        const tasks = this._getTasksFromStorage();
         for (const column in tasks) {
             const index = tasks[column].findIndex((t: Task) => t.id === task.id);
             if (index !== -1) {
                 tasks[column][index] = { ...tasks[column][index], ...task, updatedAt: new Date() };
-                this._saveTasksToStorage(tasks, userId);
+                this._saveTasksToStorage(tasks);
                 return { ...tasks[column][index], ...task, updatedAt: new Date() };
             }
         }
     }
 
-    async deleteTask(taskId: string, userId: string): Promise<void> {
-        const tasks = this._getTasksFromStorage(userId);
+    async deleteTask(taskId: string): Promise<void> {
+        const tasks = this._getTasksFromStorage();
         for (const column in tasks) {
             tasks[column] = tasks[column].filter((task: Task) => task.id !== taskId);
         }
-        this._saveTasksToStorage(tasks, userId);
+        this._saveTasksToStorage(tasks);
     }
 
-    async getTasks(userId: string): Promise<TaskColumns> {
+    async getTasks(): Promise<TaskColumns> {
         console.log('gettasks')
-        return this._getTasksFromStorage(userId);
+        return this._getTasksFromStorage();
     }
 
-    async updateTasksOrder(updatedTasks: Task[], userId: string): Promise<void> {
-        const tasks = this._getTasksFromStorage(userId);
+    async updateTasksOrder(updatedTasks: Task[]): Promise<void> {
+        const tasks = this._getTasksFromStorage();
         updatedTasks.forEach(updatedTask => {
             const column = tasks[updatedTask.column];
             const index = column.findIndex(task => task.id === updatedTask.id);
@@ -51,11 +53,11 @@ class LocalStorageTaskRepository implements ITaskRepository {
                 column[index] = { ...column[index], order: updatedTask.order };
             }
         });
-        this._saveTasksToStorage(tasks, userId);
+        this._saveTasksToStorage(tasks);
     }
 
-    async updateTaskColumn(taskId: string, newColumn: string, order: number, userId: string): Promise<Task> {
-        const tasks = this._getTasksFromStorage(userId);
+    async updateTaskColumn(taskId: string, newColumn: string, order: number): Promise<Task> {
+        const tasks = this._getTasksFromStorage();
         let task;
         for (const column in tasks) {
             const index = tasks[column].findIndex(t => t.id === taskId);
@@ -68,13 +70,13 @@ class LocalStorageTaskRepository implements ITaskRepository {
             task.column = newColumn as 'todo' | 'inProgress' | 'done';
             task.order = order;
             tasks[newColumn].push(task);
-            this._saveTasksToStorage(tasks, userId);
+            this._saveTasksToStorage(tasks);
             return task;
         }
     }
 
-    async getTaskOrder(taskId: string, userId: string): Promise<number> {
-        const tasks = this._getTasksFromStorage(userId);
+    async getTaskOrder(taskId: string): Promise<number> {
+        const tasks = this._getTasksFromStorage();
         let taskOrder = -1;
         for (const column in tasks) {
             const task = tasks[column].find(t => t.id === taskId);
@@ -86,30 +88,30 @@ class LocalStorageTaskRepository implements ITaskRepository {
         return new Promise((resolve) => resolve(taskOrder));
     }
 
-    async updateTaskOrder(taskId: string, newOrder: number, userId: string): Promise<Task> {
-        const tasks = this._getTasksFromStorage(userId);
+    async updateTaskOrder(taskId: string, newOrder: number): Promise<Task> {
+        const tasks = this._getTasksFromStorage();
         let task: Task | null = null;
         for (const column in tasks) {
             task = tasks[column].find(t => t.id === taskId);
             if (task) {
                 task.order = newOrder;
-                this._saveTasksToStorage(tasks, userId);
+                this._saveTasksToStorage(tasks);
                 break;
             }
         }
         return new Promise((resolve) => resolve(task));
     }
 
-    _getTasksFromStorage(userId: string): TaskColumns {
+    _getTasksFromStorage(): TaskColumns {
         const allUsersTasksJson = localStorage.getItem(TASKS_KEY);
         const allUsersTasks = allUsersTasksJson ? JSON.parse(allUsersTasksJson) : {};
-        return allUsersTasks[userId] || { todo: [], inprogress: [], done: [] };
+        return allUsersTasks[store.state.user.uid] || { todo: [], inprogress: [], done: [] };
     }
 
-    _saveTasksToStorage(tasks: TaskColumns, userId: string) {
+    _saveTasksToStorage(tasks: TaskColumns) {
         const allUsersTasksJson = localStorage.getItem(TASKS_KEY);
         const allUsersTasks = allUsersTasksJson ? JSON.parse(allUsersTasksJson) : {};
-        allUsersTasks[userId] = tasks;
+        allUsersTasks[store.state.user.uid] = tasks;
         localStorage.setItem(TASKS_KEY, JSON.stringify(allUsersTasks));
     }
 }

@@ -15,7 +15,6 @@ type ColumnComponentProps = {
 
 class ColumnComponent extends Component {
     state: {
-        userId: string;
         tasks: Task[];
     }
 
@@ -28,7 +27,6 @@ class ColumnComponent extends Component {
 
     setState(): void {
         this.state.tasks = useSelector(tasksColumnSelector(this.props.id), this)
-        this.state.userId = useSelector(userIdSelector(), this)
     }
 
     handleAddTask = async (event: Event): Promise<void> => {
@@ -39,8 +37,12 @@ class ColumnComponent extends Component {
         if (isValidTask(value)) {
             input.value = '';
             const order = Math.max(...this.state.tasks.map(task => task.order)) + 1;
-            const newTask = await addTask(value, this.props.id, order, this.state.userId);
+            const newTask = await addTask(value, this.props.id, order);
             store.dispatch(actions.addTask(newTask, this.props.id));
+
+
+        } else {
+            store.dispatch(actions.setAppError('Invalid task text'));
         }
     }
 
@@ -77,7 +79,7 @@ class ColumnComponent extends Component {
 
         if (targetTaskId && targetTaskId !== droppedTaskId) {
             const columnTasks = [...store.state.tasks[toColumn]];
-            const updatedTasks = reorderTasks(columnTasks, droppedTaskId, targetTaskId, this.state.userId);
+            const updatedTasks = reorderTasks(columnTasks, droppedTaskId, targetTaskId);
             store.dispatch(actions.updateTasksOrder(updatedTasks, toColumn));
         }
     }

@@ -1,13 +1,14 @@
 import { getChangedFields } from "./utils";
 import { Column, Task, TaskColumns } from "../models/Task.js";
 import { User } from "@firebase/auth";
-import { Action } from "./actions";
+import { Action, ADD_TASK, CLEAR_USER, DELETE_TASK, REFRESH_TASKS, SET_APP_ERROR, SET_AUTH_ERROR, SET_USER, TRANSFER_TASK, UPDATE_TASK, UPDATE_TASKS_ORDER } from "./actions";
 import Component from "../components/Component.js";
 
 interface State {
     tasks: TaskColumns,
     user: User | null,
-    authError: string | null
+    authError: string | null,
+    appError: string | null
 }
 
 interface ComponentListeners {
@@ -21,7 +22,8 @@ const initialState: State = {
         done: []
     },
     user: null,
-    authError: null
+    authError: null,
+    appError: null
 };
 
 const store = {
@@ -53,7 +55,6 @@ const store = {
                 component.componentDidUpdate()
             }
         }
-
         if (action.type === 'SET_USER') {
             this.notifyLoginUserListeners();
         } else {
@@ -63,7 +64,7 @@ const store = {
 
     reducer(state: State, action: Action): State {
         switch (action.type) {
-            case 'ADD_TASK':
+            case ADD_TASK:
                 return {
                     ...state,
                     tasks: {
@@ -71,7 +72,7 @@ const store = {
                         [action.payload.column]: [...state.tasks[action.payload.column], action.payload.task]
                     } as TaskColumns
                 };
-            case 'DELETE_TASK':
+            case DELETE_TASK:
                 return {
                     ...state,
                     tasks: {
@@ -79,7 +80,7 @@ const store = {
                         [action.payload.column]: state.tasks[action.payload.column].filter(t => t.id !== action.payload.taskId)
                     }
                 };
-            case 'UPDATE_TASK':
+            case UPDATE_TASK:
                 return {
                     ...state,
                     tasks: {
@@ -87,7 +88,7 @@ const store = {
                         [action.payload.task.column]: state.tasks[action.payload.task.column].map(t => t.id === action.payload.task.id ? action.payload.task : t)
                     }
                 };
-            case 'UPDATE_TASKS_ORDER':
+            case UPDATE_TASKS_ORDER:
                 return {
                     ...state,
                     tasks: {
@@ -95,7 +96,7 @@ const store = {
                         [action.payload.column]: action.payload.updatedTasks
                     }
                 };
-            case 'TRANSFER_TASK':
+            case TRANSFER_TASK:
                 const { taskId, fromColumn, toColumn, order } = action.payload;
                 const fromTasks = state.tasks[fromColumn];
                 const toTasks = state.tasks[toColumn];
@@ -114,24 +115,29 @@ const store = {
                         [toColumn]: [...toTasks, { ...task, column: toColumn, order }]
                     }
                 };
-            case 'SET_USER':
+            case SET_USER:
                 return {
                     ...state,
                     user: action.payload.user
                 };
-            case 'CLEAR_USER':
+            case CLEAR_USER:
                 return {
                     ...initialState,
                 };
-            case 'SET_AUTH_ERROR':
+            case SET_AUTH_ERROR:
                 return {
                     ...state,
                     authError: action.payload.error
                 };
-            case 'REFRESH_TASKS':
+            case REFRESH_TASKS:
                 return {
                     ...state,
                     tasks: action.payload.tasks
+                };
+            case SET_APP_ERROR:
+                return {
+                    ...state,
+                    appError: action.payload.error
                 };
             default:
                 return state;
@@ -181,6 +187,8 @@ export const taskSelector = (taskId: string, column: string) => {
     const index = store.state.tasks[column].findIndex(task => task.id == taskId)
     return () => `tasks.${column}[${index}]`;
 }
+
+export const appErrorSelector = () => () => 'appError';
 
 export const useSelector = (selector: () => string, component: Component) => {
     const selectorKey = selector();
