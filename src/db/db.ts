@@ -15,5 +15,6 @@ export const {
   updateTasksOrder,
   updateTaskColumn,
   getTaskOrder,
-  updateTaskOrder
+  updateTaskOrder,
+  generateTaskId
 } = repository;

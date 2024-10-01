@@ -1,8 +1,9 @@
 import { Task, TaskColumns, TaskInput } from "../models/Task";
 
 interface ITaskRepository {
-    saveTask(task: TaskInput): Task;
-    updateTask(task: Task): Promise<Task>;
+    saveTask(task: TaskInput): Promise<Task>;
+    generateTaskId(): string;
+    updateTask(task: Task): Promise<void>;
     deleteTask(taskId: string): Promise<void>;
     getTasks(userId: string): Promise<TaskColumns>;
     updateTasksOrder(updatedTasks: Task[]): Promise<void>;

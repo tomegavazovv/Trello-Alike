@@ -41,7 +41,11 @@ class TaskComponent extends Component {
                 text: updatedText,
             };
             store.dispatch(actions.updateTask(updatedTask));
-            updateTaskText(updatedTask);
+            updateTaskText(updatedTask).catch(error => {
+                console.error('Error updating task', error);
+                store.dispatch(actions.updateTask(this.state.task));
+                store.dispatch(actions.setAppError('Error updating task'));
+            });
         }
     }
 

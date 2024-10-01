@@ -1,37 +1,36 @@
 import ITaskRepository from './ITaskRepository';
 import { auth, db } from '../firebaseConfig';
-import { collection, deleteDoc, doc, updateDoc, getDocs, serverTimestamp, writeBatch, getDoc, query, where, setDoc } from 'firebase/firestore';
+import { collection, deleteDoc, doc, updateDoc, getDocs, serverTimestamp, writeBatch, getDoc, query, where, setDoc, addDoc } from 'firebase/firestore';
 import { Task, TaskColumns, TaskInput } from '../models/Task';
-import DatabaseError from '../errors/DatabaseError';
 
 const TASKS_COLLECTION = 'tasks';
 
 class FirebaseTaskRepository implements ITaskRepository {
-    saveTask = (task: TaskInput): Task => {
+    saveTask = async (task: TaskInput): Promise<Task> => {
         const userId = auth.currentUser.uid;
-        const newDocRef = doc(collection(db, TASKS_COLLECTION));
-        const newTaskId = newDocRef.id;
-
         const newTask: Task = {
             ...task,
-            id: newTaskId,
             userId,
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp()
         }
-        setDoc(newDocRef, newTask);
+        await setDoc(doc(db, TASKS_COLLECTION, newTask.id), newTask);
         return newTask;
     }
 
-    updateTask = async (task: Task): Promise<Task> => {
+    generateTaskId(): string {
+        const newDocRef = doc(collection(db, TASKS_COLLECTION));
+        return newDocRef.id;
+    }
+
+    updateTask = async (task: Task): Promise<void> => {
         const taskRef = doc(db, TASKS_COLLECTION, task.id);
+        const taskDoc = await getDoc(taskRef);
         await updateDoc(taskRef, {
             ...task,
             updatedAt: serverTimestamp()
         });
-
-        return { id: task.id, ...task };
-
+        
     }
 
     deleteTask = async (taskId: string): Promise<void> => {

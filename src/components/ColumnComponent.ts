@@ -1,11 +1,11 @@
 import Component from './Component';
 import TaskListComponent from './TaskListComponent';
 import { isValidTask } from '../utils/taskUtils';
-import { addTask, reorderTasks } from '../service/taskService';
+import { addTask, generateTaskId, reorderTasks, updateTasksOrderOnServer } from '../service/taskService';
 import store, { tasksColumnSelector, userIdSelector, useSelector } from '../store/store';
 import { getNearestElementByMouseY } from '../utils/domUtils';
 import { actions } from '../store/actions';
-import { Column, Task } from '../models/Task';
+import { Column, Task, TaskInput } from '../models/Task';
 
 type ColumnComponentProps = {
     id: string;
@@ -37,10 +37,20 @@ class ColumnComponent extends Component {
         if (isValidTask(value)) {
             input.value = '';
             const order = Math.max(...this.state.tasks.map(task => task.order)) + 1;
-            const newTask = await addTask(value, this.props.id, order);
+            const newTask: TaskInput = {
+                text: value,
+                column: this.props.id,
+                order,
+                id: generateTaskId()
+            }
+
             store.dispatch(actions.addTask(newTask, this.props.id));
-
-
+            addTask(newTask).catch(error => {
+                console.error('Error adding task');
+                store.dispatch(actions.deleteTask(newTask.id, this.props.id));
+                store.dispatch(actions.setAppError('Error adding task'));
+            });
+            
         } else {
             store.dispatch(actions.setAppError('Invalid task text'));
         }
@@ -65,7 +75,7 @@ class ColumnComponent extends Component {
     handleDroppedInSameColumn = (event: DragEvent): void => {
         const target = event.target as HTMLElement;
         const droppedTaskId = event.dataTransfer.getData("id");
-        const toColumn = this.props.id;
+        const column = this.props.id;
         const targetTaskElement = target.closest(".task") as HTMLElement;
         let targetTaskId = null;
 
@@ -73,14 +83,17 @@ class ColumnComponent extends Component {
             targetTaskId = targetTaskElement.id;
         } else {
             const mouseY = event.clientY;
-            const selector = `#${toColumn} .task`;
+            const selector = `#${column} .task`;
             targetTaskId = getNearestElementByMouseY(selector, mouseY)?.id;
         }
 
         if (targetTaskId && targetTaskId !== droppedTaskId) {
-            const columnTasks = [...store.state.tasks[toColumn]];
-            const updatedTasks = reorderTasks(columnTasks, droppedTaskId, targetTaskId);
-            store.dispatch(actions.updateTasksOrder(updatedTasks, toColumn));
+            const updatedTasks = reorderTasks(this.state.tasks, droppedTaskId, targetTaskId);
+            store.dispatch(actions.updateTasksOrder(updatedTasks, column));
+            updateTasksOrderOnServer(updatedTasks).catch(error => {
+                console.error('Error updating tasks order on server', error);
+                store.dispatch(actions.updateTasksOrder(this.state.tasks, column));
+            });
         }
     }
 

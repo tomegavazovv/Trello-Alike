@@ -16,6 +16,7 @@ export interface TaskInput {
     text: string,
     column: Column,
     order: number,
+    id: string
 }
 
 export interface TaskColumns {

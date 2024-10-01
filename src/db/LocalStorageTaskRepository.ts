@@ -6,7 +6,7 @@ const TASKS_KEY = 'tasks';
 
 class LocalStorageTaskRepository implements ITaskRepository {
 
-    saveTask(task: TaskInput): Task {
+    async saveTask(task: TaskInput): Promise<Task> {
         const tasks = this._getTasksFromStorage();
         const newTask: Task = {
             ...task,
@@ -19,14 +19,18 @@ class LocalStorageTaskRepository implements ITaskRepository {
         return newTask;
     }
 
-    async updateTask(task: Task): Promise<Task> {
+    generateTaskId(): string {
+        return Math.random().toString(36).substring(2, 15);
+    }
+
+    async updateTask(task: Task): Promise<void> {
         const tasks = this._getTasksFromStorage();
         for (const column in tasks) {
             const index = tasks[column].findIndex((t: Task) => t.id === task.id);
             if (index !== -1) {
                 tasks[column][index] = { ...tasks[column][index], ...task, updatedAt: new Date() };
                 this._saveTasksToStorage(tasks);
-                return { ...tasks[column][index], ...task, updatedAt: new Date() };
+                return;
             }
         }
     }

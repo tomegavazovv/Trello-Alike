@@ -3,35 +3,36 @@ import { TaskInput, Column, Task, TaskColumns } from "../models/Task";
 import { recalculateOrder } from "../utils/taskUtils";
 import { getTasks as getTasksFromDb } from "../db/db";
 import { auth } from "../firebaseConfig";
+import { generateTaskId as generateTaskIdFromFirebase } from "../db/db";
 
-export function addTask(taskText: string, column: Column, order: number): Task {
-    const task: TaskInput = {
-        text: taskText,
-        column: column,
-        order,
-    };
-    return saveTask(task);
+export async function addTask(task: TaskInput): Promise<Task> {
+    return await saveTask(task);
+}
+
+export function generateTaskId(): string {
+    return generateTaskIdFromFirebase();
 }
 
 export function deleteTaskFromColumn(taskId: string): Promise<void> {
     return deleteTask(taskId);
 }
 
-export function updateTaskText(task: Task): Promise<Task> {
+export function updateTaskText(task: Task): Promise<void> {
     return updateTask(task);
 }
 
 export function reorderTasks(tasks: Task[], droppedTaskId: string, targetTaskId: string): Task[] {
-    const taskIndex = tasks.findIndex(task => task.id === droppedTaskId);
-    const targetIndex = targetTaskId
-        ? tasks.findIndex(task => task.id === targetTaskId)
-        : tasks.length;
+    const droppedTaskIndex = tasks.findIndex(task => task.id === droppedTaskId);
+    const targetTaskIndex = tasks.findIndex(task => task.id === targetTaskId);
 
-    const [movedTask] = tasks.splice(taskIndex, 1);
-    tasks.splice(targetIndex, 0, movedTask);
-
+    const [droppedTask] = tasks.splice(droppedTaskIndex, 1);
+    tasks.splice(targetTaskIndex, 0, droppedTask);
     const updatedTasks = recalculateOrder(tasks);
-    updateTasksOrder(updatedTasks);
+    return updatedTasks;
+}
+
+export async function updateTasksOrderOnServer(updatedTasks: Task[]): Promise<Task[]> {
+    await updateTasksOrder(updatedTasks);
     return updatedTasks;
 }
 
