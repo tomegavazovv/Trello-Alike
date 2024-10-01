@@ -2,7 +2,7 @@ import Component from './Component';
 import TaskListComponent from './TaskListComponent';
 import { isValidTask } from '../utils/taskUtils';
 import { addTask, generateTaskId, reorderTasks, updateTasksOrderOnServer } from '../service/taskService';
-import store, { tasksColumnSelector, userIdSelector, useSelector } from '../store/store';
+import store, { tasksColumnSelector, useSelector } from '../store/store';
 import { getNearestElementByMouseY } from '../utils/domUtils';
 import { actions } from '../store/actions';
 import { Column, Task, TaskInput } from '../models/Task';
@@ -93,6 +93,7 @@ class ColumnComponent extends Component {
             updateTasksOrderOnServer(updatedTasks).catch(error => {
                 console.error('Error updating tasks order on server', error);
                 store.dispatch(actions.updateTasksOrder(this.state.tasks, column));
+                store.dispatch(actions.setAppError('Error updating tasks order on server'));
             });
         }
     }

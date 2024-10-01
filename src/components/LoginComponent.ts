@@ -15,7 +15,6 @@ class LoginComponent extends Component {
 
         try {
             const userCredential = await loginUser(email, password);
-
             store.dispatch(actions.setAuthError(null));
             store.dispatch(actions.setUser(userCredential.user));
         } catch (error) {
